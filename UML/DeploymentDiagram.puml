@@ -1,0 +1,44 @@
+@startuml
+title Master Odometry - Deployment Diagram
+
+!theme plain
+
+node "主ECU (e.g., ARM Cortex-A)" as ECU {
+  artifact "Application.exe" as App
+  artifact "master_odometry.lib" as Lib
+  
+  App ..> Lib : links
+}
+
+node "车辆网关 (Gateway)" as Gateway {
+}
+
+node "摄像头 (Camera)" as Cam {
+}
+
+node "惯性测量单元 (IMU)" as IMU {
+}
+
+ECU -- Gateway : <<CAN Bus>>
+ECU -- Cam : <<Ethernet>>
+ECU -- IMU : <<SPI/I2C>>
+
+note right of Gateway
+  Provides vehicle signals:
+  - Wheel Speeds
+  - Steering Angle
+  - etc.
+end note
+
+note right of Cam
+  Provides:
+  - Visual Odometry Data
+end note
+
+note right of IMU
+  Provides:
+  - Yaw/Pitch/Roll Rate
+  - Acceleration
+end note
+
+@enduml

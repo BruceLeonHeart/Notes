@@ -1,0 +1,43 @@
+@startuml
+title Odometry Output Suppression - Corrected State Machine
+
+[*] --> Active
+
+state Active {
+    state "Final Output Status" as Status {
+        state "Generating Output" as Generating_Output
+        state "Suppressing Output" as Suppressing_Output
+        Generating_Output --> Suppressing_Output : Any active suppression condition is met
+        Suppressing_Output --> Generating_Output : All active suppression conditions are clear
+    }
+    --
+    state "Speed Check" as SpeedCheck {
+        [*] -> Speed_OK
+        Speed_OK -> Speed_Too_Low : Speed < SpdMin_ms
+        Speed_Too_Low -> Speed_OK : Speed >= SpdMin_ms
+    }
+    --
+    state "Yaw Rate Check" as YawCheck {
+        [*] -> Yaw_OK
+        Yaw_OK -> Yaw_Too_High : |YawRate| > YawMax_dgs
+        Yaw_Too_High -> Yaw_OK : |YawRate| <= YawMax_dgs
+    }
+    --
+    state "Concurrent Speed & Yaw Check" as SpdYawCheck {
+        [*] -> SpdYaw_OK
+        SpdYaw_OK -> SpdYaw_Suppressed : Speed < SpdMinConcur_ms AND\n|YawRate| > YawMaxConcur_dgs
+        SpdYaw_Suppressed -> SpdYaw_OK : Speed >= SpdMinConcur_ms OR\n|YawRate| <= YawMaxConcur_dgs
+    }
+    --
+    state "Timestamp Delta Check" as TsCheck {
+        [*] -> Ts_OK
+        Ts_OK -> Ts_Too_Large : |reqTs - sigTs| > MaxTsDelta
+        Ts_Too_Large -> Ts_OK : |reqTs - sigTs| <= MaxTsDelta
+    }
+}
+
+note "The final output is suppressed if **any** of the active checks are in a suppressed state.\n\
+Which checks are active is determined by the `suppressMode` bitmask in `OdometryControl`.\n\
+Example: `Suppressing_Output` is entered if `(SUPPRESS_SPD is enabled AND state is Speed_Too_Low) OR (SUPPRESS_YAW is enabled AND state is Yaw_Too_High)` etc." as N1
+
+@enduml

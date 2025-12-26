@@ -1,0 +1,163 @@
+@startuml
+title Master Odometry - Class Diagram
+
+' Style and Layout
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+hide empty members
+
+' --- Interfaces and Abstract Classes ---
+interface IOdometry {
+  + getOdometry(...) : bool
+  + reset() : void
+  + clear() : void
+}
+
+interface IOrientation {
+  + getOrientation(...) : bool
+  + reset() : void
+  + clear() : void
+}
+
+abstract class OdometryBase {
+  # m_modom : SPtr<modom::cOdometry>
+  # populateIn(strCarOdom_t&) : bool
+  + getOdometry(...) : bool
+}
+
+abstract class SampleExtrapolator {
+  + {abstract} compute(...) : bool
+}
+
+' --- Core Utility Classes ---
+class OdomProvider {
+  - m_samples : OdomSample[]
+  - m_orientSamples : OrientationSample[]
+  - m_config : OdomInterpolateConfig
+  + addSample(...) : bool
+  + addOrientationSample(...) : bool
+  + getMOdomOutput(...) : modom::ODM_out
+  + getOrientationOutput(...) : OrientationOutput
+  # interpolatePos(...) : void
+  # interpolateOrientation(...) : bool
+}
+
+class "SampleExtrapolatorPolynomialWeighted<N>" as SampleExtrapolatorPolynomialWeighted {
+  - m_weightStdDev_s : FLOAT
+  + compute(...) : bool
+}
+
+class OdometryInterp {
+  - m_config : InterpolateConfig
+  + compute(...) : bool
+}
+
+' --- Concrete Provider Classes ---
+class OdometryLong {
+  - m_carOdomProcBufs : strCarOdomProcBufs_t
+  + addSample(strCarOdom_t&) : bool
+  + getSignals(...) : bool
+  + getOdometry(...) : bool
+}
+
+class OdometryXy {
+  - m_carOdomXyProcBufs : strCarOdomXyProcBufs_t
+  + addSample(strCarOdomXy_t&) : bool
+  + getOdometry(...) : bool
+  # getOdometry_2pt(...) : bool
+  # getOdometry_3pt(...) : bool
+  # getOdometry_provider(...) : bool
+}
+
+class OdometryVisual {
+  - m_carOdomVisualProcBufs : strCarOdomVisualProcBufs_t
+  + addSample(strCarOdomVisual_t&) : bool
+  + getOdometry(...) : bool
+}
+
+class OdometryOrient {
+  - m_carOdomOrientProcBufs : strCarOdomOrientProcBufs_t
+  + addSample(strCarOdomOrient_t&) : bool
+  + getOrientation(...) : bool
+}
+
+' --- Control Class ---
+class OdometryControl <<static>> {
+  - {static} s_controlData : controlData_T
+  + {static} init() : void
+  + {static} get...()
+  + {static} set...()
+}
+
+' --- Data Structures (represented as classes) ---
+class strCarOdom_t <<struct>> {
+  + speed_mps
+  + yawRate_dgs
+  + speed_timestamp_1us
+  + yawRate_timestamp_1us
+  + ...
+  + crc
+}
+
+class strCarOdomXy_t <<struct>> {
+  + xPosition_m
+  + yPosition_m
+  + yawAngle_deg
+  + timestamp_1us
+  + crc
+}
+
+class strCarOdomOrient_t <<struct>> {
+  + vehicleBodyRearAxleHeightLevel_m
+  + vehicleBodyRearAxlePitchAngle_deg
+  + vehicleBodyRearAxleRollAngle_deg
+  + timestamp_1us
+  + crc
+}
+
+class strCarOdomVisual_t <<struct>> {
+  + odom : VOD_odom
+  + meta : VOD_meta
+  + status
+}
+
+class controlData_T <<struct>> {
+  + suppressMode
+  + odomSrcCurr
+  + pipelineData : pipelineData_T[]
+}
+
+' --- Relationships ---
+IOdometry <|-- OdometryBase
+IOdometry <|-- OdometryVisual
+
+OdometryBase <|-- OdometryLong
+OdometryBase <|-- OdometryXy
+
+IOrientation <|-- OdometryOrient
+
+' Multiple Inheritance
+OdomProvider <|-- OdometryXy
+OdomProvider <|-- OdometryOrient
+
+SampleExtrapolator <|-- "SampleExtrapolatorPolynomialWeighted<N>"
+
+' Aggregation / Composition
+OdometryBase o--> "modom::cOdometry" : uses
+OdometryControl *-- "1" controlData_T
+
+' Dependency / Usage
+OdometryLong ..> strCarOdom_t : uses
+OdometryXy ..> strCarOdomXy_t : uses
+OdometryVisual ..> strCarOdomVisual_t : uses
+OdometryOrient ..> strCarOdomOrient_t : uses
+
+OdometryLong ..> OdometryInterp : uses
+OdometryXy ..> OdometryInterp : uses
+OdometryXy ..> "mOdom::cOdometry" : uses
+OdometryOrient ..> OdomProvider : uses
+
+OdomProvider ..> SampleExtrapolator : uses
+OdometryInterp ..> "SampleExtrapolatorPolynomialWeighted<N>" : creates
+
+@enduml

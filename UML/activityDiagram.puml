@@ -1,0 +1,64 @@
+@startuml
+title Master Odometry - Typical Usage Flow (e.g., OdometryLong)
+
+|Application|
+start
+:Create `modom::cOdometry` instance;
+:Create `OdometryLong` provider instance\n(pass `cOdometry` pointer);
+:Use `OdometryControl` to configure\nglobal and provider parameters;
+
+|Data Input Thread|
+while (Receiving data from CAN/Sensor?) is (yes)
+  :Receive raw sensor data;
+  :Fill `strCarOdom_t` sample struct;
+  :Calculate CRC for the sample;
+  :Call `odomLongProvider.addSample(sample)`;
+  |Odometry Library|
+  :Perform validity checks (CRC, timestamp, etc.);
+  if (Sample is valid and new?) then (yes)
+    :Store sample in internal\ncircular buffer `m_carOdomProcBufs`;
+  else (no)
+    :Discard sample;
+  endif
+|Data Input Thread|
+endwhile
+
+|Application Thread|
+while (Need Odometry Data?) is (yes)
+  :Get `request_ts_us` (e.g., from camera frame);
+  :Call `odomLongProvider.getOdometry(output, request_ts_us)`;
+  |Odometry Library|
+  switch (Processing Mode?)
+  case ( ODOM_PRC_INT_LONG_WR )
+    :Call `getSignals(interpolated_sample, request_ts_us)`;
+    partition "Signal Interpolation" {
+      :Collect relevant samples from buffer\naround `request_ts_us`;
+      :Use `OdometryInterp` (and `SampleExtrapolator`)\nto perform weighted regression;
+      :Fill `interpolated_sample` with results;
+    }
+    :Call `populateIn(interpolated_sample)`;
+    :Fill `modom::ODM_in` struct;
+    :Call `m_modom->addSignals(...)`;
+    :Fallthrough to mOdom update;
+  case ( ODOM_PRC_INT_LONG_ALL )
+    :Iterate through all new samples in buffer;
+    :Call `populateIn(sample)` for each;
+    :Fill `modom::ODM_in` struct;
+    :Call `m_modom->addSignals(...)`;
+    :Fallthrough to mOdom update;
+  case ( other modes )
+    :Select/interpolate sample based on mode;
+    :Call `populateIn(selected_sample)`;
+    :Fallthrough to mOdom update;
+  endswitch
+  partition "mOdom Core Calculation" {
+    :Call `m_modom->update(request_ts_us, output)`;
+    :mOdom performs internal calculations\nand populates the `modom::ODM_out` struct;
+  }
+  :Return `true` and the `output` data;
+|Application Thread|
+  :Use the `modom::ODM_out` data;
+endwhile
+
+stop
+@enduml

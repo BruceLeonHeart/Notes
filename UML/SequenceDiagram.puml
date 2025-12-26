@@ -1,0 +1,51 @@
+@startuml
+title OdometryXy - Sequence Diagram (3-Point External Weighted Regression)
+
+actor Application
+participant OdometryXy
+participant OdometryInterp
+participant "SampleExtrapolator\nPolynomialWeighted<N>" as Extrapolator
+
+Application -> OdometryXy: getOdometry(odomOut, sysTs, reqTs, prevReqTs)
+activate OdometryXy
+
+OdometryXy -> OdometryXy: switch (getOdomPrcType())
+note right: Case: ODOM_PRC_EXT_XY_3PT_WR
+
+OdometryXy -> OdometryXy: getOdometry_3pt(..., f_external=true)
+activate OdometryXy
+
+OdometryXy -> OdometryXy: setTargetTs_3pt(reqTs)
+note right: Calculate target timestamps\nts0, ts1, ts2 based on reqTs
+
+loop for target timestamp in [ts0, ts1, ts2]
+    OdometryXy -> OdometryXy: getSignals(carOdomXy, targetTs, extrapolated)
+    activate OdometryXy
+    note right: Collect samples from\ninternal buffer
+    OdometryXy -> OdometryInterp: compute(valueOut, samples)
+    activate OdometryInterp
+    OdometryInterp -> Extrapolator: compute(valueOut, samples)
+    activate Extrapolator
+    Extrapolator --> OdometryInterp: success
+    deactivate Extrapolator
+    OdometryInterp --> OdometryXy: success
+    deactivate OdometryInterp
+    note left: Fills carOdomXy with\ninterpolated X, Y, Yaw
+    deactivate OdometryXy
+end
+
+OdometryXy -> OdometryXy: processPhysical(idx0, idx1)
+note right: Calculate physical params (speed, yawRate)\nfor interval ts0->ts1, store as carOdom1
+OdometryXy -> OdometryXy: processPhysical(idx1, idx2)
+note right: Calculate physical params (speed, yawRate)\nfor interval ts1->ts2, store as carOdom2
+
+OdometryXy -> OdometryXy: populateOut(odomOut, carOdom1, carOdom2, reqTs)
+activate OdometryXy
+note right: Interpolate physical params\nfrom ts1 & ts2 to reqTs and\nfill the final odomOut struct
+deactivate OdometryXy
+
+deactivate OdometryXy
+OdometryXy --> Application: true (success)
+deactivate OdometryXy
+
+@enduml

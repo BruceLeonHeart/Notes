@@ -1,0 +1,80 @@
+@startuml
+title Master Odometry - Component Diagram
+
+!theme plain
+skinparam componentStyle uml2
+
+package "Master Odometry Library" {
+    [Control Center] as Control
+    [Data Structures] as Structs
+    [Core Engine] as Engine
+    [Interfaces]
+    [Providers]
+
+    package "Core Engine" {
+        [Interpolation]
+        [Extrapolation]
+    }
+}
+
+[External Dependencies] as Ext
+
+[Providers] ..> [Interfaces] : implements
+[Providers] ..> [Engine] : uses
+[Providers] ..> [Structs] : uses
+[Providers] ..> [Control] : configured by
+
+[Engine] ..> [Extrapolation] : uses
+[Interfaces] ..> [Control] : uses
+[Interfaces] ..> [Structs] : uses
+
+[Providers] ..> [Ext] : uses
+[Control] ..> [Ext] : uses
+
+note right of Control
+  **OdometryControl**
+  Global static configuration
+  and state management.
+end note
+
+note right of Structs
+  **strCarOdom*_t**
+  Standardized data packets
+  for different sensor inputs.
+end note
+
+note right of Providers
+  **OdometryLong**
+  **OdometryXy**
+  **OdometryVisual**
+  **OdometryOrient**
+  Concrete implementations for
+  each data source.
+end note
+
+note right of Interfaces
+  **IOdometry**
+  **IOrientation**
+  **OdometryBase**
+  Defines the public API and
+  common base functionality.
+end note
+
+note right of Interpolation
+  **OdometryInterp**
+  **OdomProvider**
+  High-level interpolation tools.
+end note
+
+note right of Extrapolation
+  **SampleExtrapolator**
+  Core mathematical algorithm
+  (weighted polynomial regression).
+end note
+
+note right of Ext
+  **mOdom** (core kinematics)
+  **sys**, **utl**, **memmgr** (utilities)
+end note
+
+@enduml
