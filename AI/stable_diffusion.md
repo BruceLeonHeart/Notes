@@ -41,6 +41,9 @@
 
 ------------------------------
 四、进阶
+    功能包含: 
+        文生图（text2img）：根据提示词（Prompt）的描述生成相应的图片。
+        图生图（img2img）：将一张图片根据提示词（Prompt）描述的特点生成另一张新的图片。
     需要了解vae和Lora
     NSFW模型 是 Not Safe For Work 的缩写，直译为“不适合在办公场所查看的内容” 
     https://civitai.com/
