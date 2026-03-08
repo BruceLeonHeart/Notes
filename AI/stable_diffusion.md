@@ -42,3 +42,5 @@
 ------------------------------
 四、进阶
     需要了解vae和Lora
+    NSFW模型 是 Not Safe For Work 的缩写，直译为“不适合在办公场所查看的内容” 
+    https://civitai.com/
