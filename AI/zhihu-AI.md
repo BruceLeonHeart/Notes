@@ -38,3 +38,100 @@
                                                                                               
   必读：https://docs.openclaw.ai/gateway/security
 ```
+
+### SKILL
+
+
+#### 原理
+ step1,选择合适的SKILL，通过metadata(name,description)
+ step2,加载skill的使用文档
+ 本身不会全部都传入到agent，从可选集合中选中才进入agent
+
+
+#### 获取SKILL
+安装clawhub
+```sh
+  # 对应的网址 clawhub.ai
+  npm install -g clawhub
+  # 搜索 "PPT" 相关的
+  clawhub search "PPT"
+  # 安装 "PPT" 相关的  
+  clawhub install ppt-generator
+  # 默认安装路径 ~/.clawhub/skills/ppt-generator
+  # 安装到指定路径  clawhub install 技能名 --workdir 目标根路径 --dir 技能文件夹名
+
+  # 从本地安装技能移动到agent的可选集合中
+  mv ~/.clawhub/skills/ppt-generator ~/.openclaw/skills/ppt-generator
+
+  # 查看agent的可选集合
+  openclaw skills list 
+
+  # 下载新的SKILL后,修改json文件;另外， 一般需要重启openclaw服务
+  openclaw gateway --port 18789
+
+
+```
+
+
+
+
+
+
+## Coze
+低代码平台
+
+
+# Q&A
+## 1.如何进行一个应用构建？
+### 1.1 需求描述：
+  - 分析用户问题和场景
+
+
+### 1.2 技术选型
+  - 高代码（Langchain,LangGraph,Qwen-Agent,LlamaIndex）
+  - 低代码(Coze,Dify)
+  - Agent 还是工作流？
+    * Agent 是一个基于SKILL的智能体，可以执行复杂的任务。
+    * 工作流 是一个基于SKILL的流程，可以执行简单的任务。
+  - 是否包含Tool？
+  - 是否有RAG（知识库）
+
+### 1.3 实现细节：
+  - 高代码实现:AI 编程（Cursor Trae）
+  - 低代码实现：Coze,Dify
+
+### 1.4 整理一些测试问题：
+  - 测试Agent是否能够执行复杂的任务
+  - 测试工作流是否能够执行简单的任务
+  - 测试Tool是否能够正常工作
+  - 测试RAG是否能够正常工作
+
+
+## 2.常见商用模型
+
+- 国外
+  - Claude Opus 4.6
+  - GPT 5.4
+
+- 国内
+  - GLM
+  - Kimi 2.5
+  - MiniMax
+  - Qwen3-Coder-Plus
+
+- Coding Plan
+ - GLM
+ - KIMI
+ - MiniMax
+
+## 3.行业
+
+- 金融
+- 医疗
+- 教育
+- 法律
+- 企业
+
+##  4.Claw-code
+python 实现
+开源 claude code开源
