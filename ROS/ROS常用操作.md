@@ -13,10 +13,9 @@
 - **工作空间（Workspace）**: 存放ROS包的目录结构
 
 ### ROS版本
-- **Noetic**: Ubuntu 20.04
-- **Humble**: Ubuntu 22.04
-- **Iron**: Ubuntu 22.04 (最新LTS)
-- **Jazzy**: Ubuntu 24.04 (最新)
+- **Noetic Ninjemys**: Ubuntu 20.04（ROS1 最后一个 LTS 版本，维护至 2025 年）
+- **Melodic Morenia**: Ubuntu 18.04（已停止维护）
+- **Kinetic Kame**: Ubuntu 16.04（已停止维护）
 
 ---
 
@@ -103,7 +102,7 @@ rospack profile
 ```
 
 ### 包的结构
-```
+```text
 package_name/
 ├── CMakeLists.txt      # CMake构建配置文件
 ├── package.xml         # 包的元数据和依赖
@@ -248,10 +247,10 @@ rosmsg list
 # 查看消息定义
 rosmsg show std_msgs/String
 
-# 查找消息
-rosmsg find geometry_msgs/Twist
+# 列出某个包中的所有消息
+rosmsg package geometry_msgs
 
-# 查看消息依赖
+# 查看消息的 md5 校验和
 rosmsg md5 std_msgs/String
 ```
 
@@ -304,11 +303,11 @@ rosrun actionlib_tutorials fibonacci_client
 # 列出所有参数
 rosparam list
 
-# 查看参数值
+# 查看参数值（返回 YAML 格式，可据此判断参数类型）
 rosparam get /param_name
 
-# 查看参数类型
-rosparam get /param_name --type
+# 查看某个命名空间下的所有参数
+rosparam get /namespace
 
 # 查看参数树
 rosparam dump -v
@@ -373,13 +372,13 @@ roslaunch --args package_name launch_file.launch
   <!-- 设置全局参数 -->
   <param name="robot_name" value="turtlebot"/>
   
+  <!-- 声明参数（须在引用它的 group 之前声明） -->
+  <arg name="use_sim_time" default="false"/>
+
   <!-- 条件执行 -->
   <group if="$(arg use_sim_time)">
     <param name="use_sim_time" value="true"/>
   </group>
-  
-  <!-- 声明参数 -->
-  <arg name="use_sim_time" default="false"/>
 </launch>
 ```
 
@@ -514,8 +513,8 @@ rosrun --prefix "gdb -ex run --args" package_name node_name
 # 使用valgrind检查内存
 rosrun --prefix "valgrind" package_name node_name
 
-# 查看节点的CPU和内存使用
-rosrun rosnode node_info /node_name
+# 查看节点信息（连接关系、发布/订阅话题、提供的服务等）
+rosnode info /node_name
 
 # 查看ROS节点的启动时间
 rosnode info /node_name | grep Time
@@ -530,11 +529,11 @@ rosrun genpy gen_py.py msg
 # 消息生成
 rosmsg show package_name/MessageType
 
-# 服务生成
+# 查看服务定义
 rossrv show package_name/ServiceType
 
-# 动作生成
-rosaction show package_name/ActionType
+# 查看动作定义（action 本质是消息类型，用 rosmsg 查看）
+rosmsg show package_name/ActionType
 ```
 
 ---
@@ -597,7 +596,7 @@ rosmsg show <msg>
 rossrv show <srv>
 
 # 查看动作定义
-rosaction show <action>
+rosmsg show <action>
 
 # 查看TF变换
 rosrun tf tf_echo <frame1> <frame2>
@@ -806,6 +805,12 @@ int main(int argc, char **argv) {
 
 ## 总结
 
-ROS是一个强大的机器人操作系统，提供了丰富的工具和功能来开发机器人应用。本笔记涵盖了ROS的常用操作，包括工作空间管理、包操作、节点管理、话题通信、服务调用、参数设置、启动文件编写等方面。
+ROS 是基于节点间通信（话题/服务/动作）的机器人开发框架。常用操作速查：
 
-通过掌握这些基本操作，你可以更加高效地开发ROS应用，构建复杂的机器人系统。建议结合官方文档和实际项目练习，不断加深对ROS的理解和应用。
+- 工作空间：catkin_make 编译，source devel/setup.bash 激活
+- 通信前提：roscore 启动 ROS Master
+- 节点：rosnode list / rosnode info
+- 话题：rostopic list / echo / pub / hz / bw
+- 服务：rosservice list / call / type
+- 参数：rosparam set / get / dump / load
+- 多节点编排：roslaunch 统一启动

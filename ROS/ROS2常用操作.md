@@ -15,10 +15,11 @@
 - **生命周期（Lifecycle）**: 节点的状态管理
 
 ### ROS2版本
-- **Humble Hawksbill**: Ubuntu 22.04 (LTS)
-- **Iron Irwini**: Ubuntu 22.04
-- **Jazzy Jalisco**: Ubuntu 24.04 (最新LTS)
-- **Kinetic Kame**: Ubuntu 16.04 (已过时)
+- **Foxy Fitzroy**: Ubuntu 20.04（LTS，已停止支持）
+- **Galactic Geochelone**: Ubuntu 20.04（已停止支持）
+- **Humble Hawksbill**: Ubuntu 22.04（LTS）
+- **Iron Irwini**: Ubuntu 22.04（非 LTS，已停止支持）
+- **Jazzy Jalisco**: Ubuntu 24.04（LTS，当前最新）
 
 ---
 
@@ -115,7 +116,7 @@ ros2 pkg xml package_name
 ### 包的结构
 
 #### C++包结构
-```
+```text
 package_name/
 ├── CMakeLists.txt      # CMake构建配置文件
 ├── package.xml         # 包的元数据和依赖
@@ -128,7 +129,7 @@ package_name/
 ```
 
 #### Python包结构
-```
+```text
 package_name/
 ├── setup.py            # Python包配置
 ├── setup.cfg           # 额外配置
@@ -248,8 +249,8 @@ ros2 service call /service_name
 # 调用带参数的服务
 ros2 service call /add_two_ints example_interfaces/srv/AddTwoInts '{a: 1, b: 2}'
 
-# 查看服务参数
-ros2 service find example_interfaces/srv/AddTwoInts
+# 列出所有服务及其类型
+ros2 service list -t
 ```
 
 ### 创建服务
@@ -277,11 +278,11 @@ ros2 msg list
 # 查看消息定义
 ros2 msg show std_msgs/msg/String
 
-# 查找消息
-ros2 msg find geometry_msgs/msg/Twist
+# 在接口列表中查找某消息类型
+ros2 interface list | grep geometry_msgs/msg/Twist
 
-# 查看消息依赖
-ros2 msg package std_msgs
+# 列出所有提供接口的包
+ros2 interface packages
 ```
 
 ### 创建消息
@@ -894,13 +895,10 @@ def generate_launch_description():
 
 ## 总结
 
-ROS2是一个强大的机器人操作系统，提供了丰富的工具和功能来开发机器人应用。本笔记涵盖了ROS2的常用操作，包括工作空间管理、包操作、节点管理、话题通信、服务调用、参数设置、启动文件编写等方面。
+ROS2 是基于 DDS 的新一代机器人开发框架，与 ROS1 的主要差异：
 
-ROS2相比ROS1有许多改进，包括：
-- 更现代的构建系统（Colcon）
-- 更灵活的通信机制（DDS）
-- 更强大的参数系统
-- 更好的多机器人支持
-- 更现代化的API设计
-
-通过掌握这些基本操作，你可以更加高效地开发ROS2应用，构建复杂的机器人系统。建议结合官方文档和实际项目练习，不断加深对ROS2的理解和应用。
+- 构建系统：catkin_make → colcon
+- 通信中间件：ROS Master → DDS，ros2 daemon 按需启动
+- 参数系统：节点级参数，支持类型描述与动态声明（ros2 param describe）
+- 多机通信：以 ROS_DOMAIN_ID 隔离，无需配置 ROS_MASTER_URI
+- 命令体系：ros1 工具统一替换为 ros2 子命令（rosnode → ros2 node 等）

@@ -134,7 +134,7 @@ https://s3.eu-central-1.amazonaws.com/avg-kitti/devkit_odometry.zip
 
 为了节省空间，所有扫描数据均以 Nx4 浮点矩阵的形式存储到二进制文件中，代码如下：
 
-```
+```cpp
 stream = fopen (dst_file.c_str(),"wb");
 fwrite(data,sizeof(float),4*num,stream);
 fclose(stream);
@@ -143,7 +143,7 @@ fclose(stream);
 其中，data 包含 4*num 个值，前 3 个值分别对应 x、y 和 z 轴，最后一个值表示反射率信息。所有扫描数据
 均按行对齐存储，这意味着前 4 个值对应于
 第一次测量。由于每次扫描的点数可能不同，因此必须在读取文件时根据文件大小确定，其中 1e6 是值数量的上限，足够大：
-```
+```cpp
 // 分配 4 MB 缓冲区（仅需约 130*4*4 KB）
 int32_t num = 1000000;
 float *data = (float*)malloc(num*sizeof(float));
@@ -165,4 +165,4 @@ px+=4; py+=4; pz+=4; pr+=4;
 fclose(stream);
 ```
 
-x,y 和 y 以米为单位存储在 Velodyne 坐标系中。
+x,y 和 z 以米为单位存储在 Velodyne 坐标系中。

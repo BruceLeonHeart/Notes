@@ -314,3 +314,38 @@ git rebase -i HEAD~n
 ```bash
 git config --list --show-origin
 ```
+
+## 快捷 alias 对照
+
+同目录的 `.bashrc` 提供了一组 git 快捷命令，常用 alias 与对应命令对照如下：
+
+| alias | 对应命令 | 说明 |
+| --- | --- | --- |
+| `g` | `git` | git 主命令 |
+| `gs` | `git status` | 查看工作区状态 |
+| `gss` | `git status -s` | 简短状态 |
+| `gl` | `git log --oneline --graph --decorate` | 图形化查看提交历史 |
+| `gla` | `git log --oneline --graph --decorate --all` | 图形化查看所有分支历史 |
+| `sub` | `git submodule` | 子模块操作 |
+| `br` | `git branch` | 查看分支 |
+| `gba` | `git branch -a` | 显示所有分支（包括远程） |
+| `gbd` | `git branch -d` | 删除分支 |
+| `co` | `git checkout` | 切换分支 |
+| `gcob` | `git checkout -b` | 创建并切换分支 |
+| `ga` | `git add` | 添加文件到暂存区 |
+| `gaa` | `git add --all` | 添加所有文件 |
+| `gc` | `git commit -m` | 提交并指定消息 |
+| `gca` | `git commit --amend` | 修改最后一次提交 |
+| `gcan` | `git commit --amend --no-edit` | 修改提交但不改消息 |
+| `gf` | `git fetch` | 拉取远程更新 |
+| `gpl` | `git pull` | 拉取并合并 |
+| `gps` | `git push` | 推送 |
+| `gpsu` | `git push -u origin HEAD` | 推送并设置上游分支 |
+| `gst` | `git stash` | 储藏当前工作 |
+| `gstp` | `git stash pop` | 应用并删除最近储藏 |
+| `gr` | `git restore` | 恢复工作区文件 |
+| `grs` | `git restore --staged` | 取消暂存 |
+| `gd` | `git diff` | 查看工作区改动 |
+| `gds` | `git diff --staged` | 比较暂存区改动 |
+
+完整清单见同目录 `.bashrc`，可复制到 `~/.bashrc` 使用。

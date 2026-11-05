@@ -1,3 +1,8 @@
+## Git 偏好
+
+Linux下配置在用户下的.bashrc尾部添加git别名配置，减少字符数入量
+
+```bash
 # ===== Git 快捷命令 =====
 alias g='git'
 
@@ -37,3 +42,4 @@ alias grs='git restore --staged'  # 取消暂存
 # 差异比较
 alias gd='git diff'
 alias gds='git diff --staged'  # 比较暂存区改动
+```

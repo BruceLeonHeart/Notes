@@ -1,17 +1,17 @@
-# 如果我想将Docker的内部配置作为开发环境来进行开发，整个的工作流程是怎么样的？ 比如SLAM14讲有自己的Docker 我应该怎么做？
+# 将 Docker 作为开发环境的工作流程（以 SLAM 十四讲官方镜像为例）
 
 将 Docker 作为开发环境是一个非常优秀且现代的实践，它能确保开发、测试和部署环境的一致性，避免了“在我电脑上能跑”的经典问题。
 
-对于《SLAM十四讲》这类需要特定库（如 Eigen, Sophus, Pangolin 等）的项目，使用其官方提供的 Docker 镜像（如 gaoxiang12/slambook2）作为开发环境是绝佳的选择。下面我将为你详细介绍整个工作流程。
+对于《SLAM十四讲》这类需要特定库（如 Eigen、Sophus、Pangolin 等）的项目，使用其官方提供的 Docker 镜像（如 gaoxiang12/slambook2）作为开发环境是绝佳的选择。以下是整个工作流程的详细介绍。
 
-核心思想是：代码在你的主机（Host OS）上，而编译和运行在容器（Container）里。 这样你就可以使用你最喜欢的本地编辑器（如 VS Code），同时利用容器里已经配置好的一切依赖。
+核心思想是：代码在主机（Host OS）上，而编译和运行在容器（Container）里。这样即可使用本地编辑器（如 VS Code），同时利用容器里已经配置好的全部依赖。
 
 我们主要有两种主流的工作流程：
 
 1. **传统方式：命令行 + 卷挂载 (Volume Mounting)**
 2. **现代方式：VS Code + Remote - Containers 插件（强烈推荐）**
 
-# 工作流程一：命令行 + 卷挂载
+## 工作流程一：命令行 + 卷挂载
 这是最基础也是最核心的方式，理解它有助于你理解 Docker 的工作原理。
 
 ## 步骤 1: 在主机上准备代码
@@ -24,7 +24,7 @@ cd slambook2
 ```
 
 ## 步骤 2: 拉取 Docker 镜像
-从 Docker Hub 上拉取官方已经制作好的环境镜像。(实际上不存在)
+从 Docker Hub 上拉取高翔《视觉SLAM十四讲》官方提供的环境镜像（gaoxiang12/slambook2 镜像及 bionic tag 均真实存在）。
 
 ```bash
 docker pull gaoxiang12/slambook2:bionic
@@ -47,8 +47,8 @@ docker run -it --rm \
 * -it: 启动一个交互式的终端 (interactive TTY)，这样你就可以在容器里敲命令了。
 * --rm: 当容器退出时，自动删除它。这对于临时的开发会话很方便，可以避免产生很多无用的旧容器。
 * -v <你本地的代码路径>/slambook2:/root/slambook2: 卷挂载。
-    - : 前面是你主机上的绝对路径。
-    - : 后面是你想映射到容器内部的路径。
+    - 冒号前面是你主机上的绝对路径。
+    - 冒号后面是你想映射到容器内部的路径。
     - 执行后，你在主机上对 <你本地的代码路径>/slambook2 目录下的任何文件修改，都会实时同步到容器内的 /root/slambook2 目录，反之亦然。
 * gaoxiang12/slambook2:bionic: 指定要使用的镜像。  
 
@@ -58,7 +58,6 @@ docker run -it --rm \
 现在，你所有的操作都在容器里进行。
 
 ```bash
- Show full code block 
 # 进入我们刚刚挂载的目录
 cd /root/slambook2
 
@@ -79,7 +78,7 @@ make -j4 # -j4 表示使用4个核心并行编译，可以加快速度
 1. 编辑代码：在你的主机上，用你喜欢的任何编辑器（VS Code, Sublime Text, Vim...）打开 <你本地的代码路径>/slambook2 并修改代码。
 2. 编译运行：切换到已经打开的容器终端，进入对应目录，执行 make 和 ./executable。
 
-# 工作流程二：VS Code + Remote - Containers 插件 (推荐)
+## 工作流程二：VS Code + Remote - Containers 插件（推荐）
 这个方法将上述流程无缝集成到了 VS Code 中，体验极佳，是目前的主流选择。
 
 ## 步骤 1: 安装必备软件
@@ -87,7 +86,7 @@ make -j4 # -j4 表示使用4个核心并行编译，可以加快速度
 2. Visual Studio Code。
 3. 在 VS Code 中安装微软官方插件：Remote - Containers。
 
-!VS Code Remote Containers Extension
+**VS Code Remote Containers 扩展**
 
 ## 步骤 2: 准备代码
 和方法一一样，先 git clone 代码到本地。
@@ -101,7 +100,7 @@ cd slambook2
 1. 在 VS Code 中，点击左下角的绿色 >< 图标，或者按 F1 打开命令面板。
 2. 选择 "Remote-Containers: Open Folder in Container..."。
 3. 在弹出的文件选择框中，选择你刚刚克隆的 slambook2 文件夹。
-V4. S Code 会询问你如何配置容器环境。选择 "From a Docker image"。
+4. VS Code 会询问你如何配置容器环境。选择 "From a Docker image"。
 5. 在输入框中，输入镜像名称 gaoxiang12/slambook2:bionic 并回车。
 
 VS Code 会自动完成以下工作：
@@ -116,10 +115,9 @@ VS Code 会自动完成以下工作：
 ## 步骤 4: 无缝开发
 编辑代码：就像在本地一样直接编辑。
 
-编译运行：打开 VS Code 的集成终端 (Ctrl+ `)，这个终端已经是容器的 shell 了。直接执行编译命令：
+编译运行：打开 VS Code 的集成终端（Ctrl+`），这个终端已经是容器的 shell 了。直接执行编译命令：
 
 ```bash
- Show full code block 
 # 终端已经是 /root/slambook2 目录了
 cd ch3
 mkdir build
@@ -130,7 +128,7 @@ make
 ```
 调试：你甚至可以配置 launch.json，直接在 VS Code 中对容器内的程序进行断点调试，和本地开发体验完全一致。
 
-# 常见问题：如何运行带 GUI 的程序？ (如 Pangolin)
+## 常见问题：如何运行带 GUI 的程序？（如 Pangolin）
 SLAM 项目经常需要图形化显示，而 Docker 默认没有图形界面。你需要将容器的图形化请求转发到你的主机上，这称为 X11 Forwarding。
 
 ## 对于 Linux 主机 (最简单)
@@ -185,7 +183,7 @@ docker run -it --rm \
 	]
 }
 ```
-# 总结
+## 总结
 
 
 |特性	|命令行 + 卷挂载|	VS Code + Remote-Containers|
@@ -194,4 +192,6 @@ docker run -it --rm \
 |缺点|	操作繁琐，需要手动管理终端和编辑器|	依赖 VS Code|
 |推荐度|	了解原理|	强烈推荐用于日常开发|
 
-希望这个详细的流程能帮助你顺利地在 Docker 环境中进行 SLAM 开发！
+## 相关
+
+- 使用 VS Code 访问远程服务器 Docker（见同目录 [使用vscode访问远程服务器Docker.md](./使用vscode访问远程服务器Docker.md)）

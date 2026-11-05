@@ -31,7 +31,7 @@ RANSAC 的流程可以概括为以下几个步骤：
 ## 3. RANSAC 关键参数
 
 -   **最小样本数 `s`**：由所选模型决定，是固定的。
--   **距离阈值 `t`**：用于区分局内点和局外点，这个值的选择非常关键。太小会导致很多本应是局内点的点被误判，太大会导致模型对局外点过于宽松。通常需要根据经验或数据特性来设定。
+-   **距离阈值 `t`**：用于区分局内点和局外点，这个值的选择非常关键。太小会导致很多本应是局内点的点被误判，太大会导致模型对局外点过于宽松。图像匹配场景中通常取 1-3 像素的重投影误差，本质矩阵估计在归一化坐标下则取 1e-3 量级。
 -   **迭代次数 `k`**：理论上，迭代次数越多，找到最优解的概率越高。`k` 的值可以根据一个概率公式来确定：
 -   **最小内点数 `d` (可选)**：一个预设的阈值，代表一个“可接受”或“足够好”的模型所应拥有的最少内点数量。当 RANSAC 找到一个拥有超过 `d` 个内点的模型时，可以提前终止迭代，这是一种常见的性能优化策略。
 
@@ -52,6 +52,17 @@ RANSAC 的流程可以概括为以下几个步骤：
 
 总而言之，**设置最小内点数 `d` 是一种在“最优解”和“计算效率”之间进行权衡的实用策略**。
 
+### 优缺点
+
+- **优点**：
+  - 对离群点鲁棒性极强，可处理高达 50% 甚至更多的离群点；
+  - 概念简单、通用性强，适用于各种模型拟合问题（直线/平面、单应矩阵、本质/基础矩阵等）。
+- **缺点**：
+  - 非确定性：随机采样导致每次运行结果略有差异；
+  - 计算成本高：当最小样本数 `s` 较大或内点率 `w` 较低时，迭代次数 `k` 会非常大；
+  - 参数敏感：阈值 `t` 和内点率 `w` 的估计对结果影响很大，通常需要经验或试错；
+  - 不保证最优解，只保证以概率 `p` 找到可接受的解。
+
 ## 4. 应用：使用 RANSAC 求解本质矩阵 (Essential Matrix)
 
 在计算机视觉中，一个经典的应用是利用匹配好的特征点对来估计两幅图像之间的相机运动，其中关键一步就是求解本质矩阵 `E`。
@@ -67,6 +78,59 @@ $$ p_2^T E p_1 = 0 $$
 ### 8点算法简介
 
 求解本质矩阵 `E` 最经典的方法是 **8点算法**。由于 `E` 是一个 3x3 矩阵，有9个未知数，但它具有尺度等价性，所以实际上有8个自由度。因此，理论上只需要8对匹配点就可以建立一个线性方程组 `Ah = 0` 来求解 `E` 的元素。
+
+### 坐标归一化（Hartley 归一化）
+
+直接在原始像素坐标上跑 8 点算法数值稳定性差（像素坐标量级大、质心远离原点）。**Hartley 归一化** 的做法是：先把点集平移到质心（原点），再缩放使各点到原点的平均距离为 `sqrt(2)`，跑完 8 点算法后用归一化矩阵的逆把结果变换回去。
+
+```cpp
+/**
+ * @brief Hartley 归一化：平移到质心 + 缩放使平均距离为 sqrt(2)
+ * @param points          输入图像点
+ * @param normalized_points 输出归一化后的点
+ * @param T               输出 3x3 归一化变换矩阵 p_norm = T * p_h
+ */
+void normalizePoints(const std::vector<cv::Point2f>& points,
+                     std::vector<cv::Point2f>& normalized_points,
+                     cv::Mat& T) {
+    if (points.empty()) {
+        T = cv::Mat::eye(3, 3, CV_64F);
+        return;
+    }
+
+    // 1. 质心
+    double centroid_x = 0, centroid_y = 0;
+    for (const auto& p : points) { centroid_x += p.x; centroid_y += p.y; }
+    centroid_x /= points.size();
+    centroid_y /= points.size();
+
+    // 2. 到质心的平均距离
+    double avg_dist = 0.0;
+    for (const auto& p : points) {
+        avg_dist += std::sqrt((p.x - centroid_x) * (p.x - centroid_x) +
+                              (p.y - centroid_y) * (p.y - centroid_y));
+    }
+    avg_dist /= points.size();
+
+    // 3. 缩放因子：使平均距离等于 sqrt(2)
+    double scale = std::sqrt(2.0) / avg_dist;
+
+    // 4. 归一化矩阵：先平移(质心→原点)，再缩放
+    T = (cv::Mat_<double>(3, 3) <<
+         scale, 0, -scale * centroid_x,
+         0, scale, -scale * centroid_y,
+         0,     0,  1);
+
+    // 5. 应用归一化
+    normalized_points.clear();
+    for (const auto& p : points) {
+        normalized_points.push_back(cv::Point2f(scale * (p.x - centroid_x),
+                                                scale * (p.y - centroid_y)));
+    }
+}
+```
+
+> 注意区分两种"归一化"：Hartley 归一化是为了改善 8 点法的数值稳定性；而用相机内参的逆 `K_inv` 把像素坐标变换到归一化相机坐标，是本质矩阵定义本身要求的物理归一化。下面的实现采用后者。
 
 ### RANSAC 流程
 
@@ -267,6 +331,33 @@ int main() {
 }
 ```
 
-## 6. 总结
+## 6. 编译与运行
+
+依赖 OpenCV。编译命令（注意反引号包裹 pkg-config）：
+
+```bash
+# OpenCV 4.x
+g++ ransac_essential.cpp -o ransac_essential `pkg-config opencv4 --cflags --libs`
+
+# OpenCV 3.x
+g++ ransac_essential.cpp -o ransac_essential `pkg-config opencv --cflags --libs`
+
+# 运行
+./ransac_essential
+```
+
+Windows / MinGW 下需手动指定头文件与库路径：
+
+```bash
+g++ ransac_essential.cpp -o ransac_essential.exe \
+    -I"C:\path\to\opencv\build\include" \
+    -L"C:\path\to\opencv\build\x64\vc15\lib" \
+    -lopencv_core455 -lopencv_imgproc455 -lopencv_calib3d455 -lopencv_features2d455
+# 库文件名按实际 OpenCV 版本调整，通常只需 core / imgproc / calib3d / features2d
+```
+
+实际项目中可直接用 OpenCV 封装好的 `cv::findEssentialMat(..., cv::RANSAC, ...)`，内部已实现 RANSAC；自己实现一版是为了理解其核心循环。
+
+## 7. 总结
 
 RANSAC 是一个非常实用且效果显著的算法，广泛应用于计算机视觉的各种参数估计问题中，如直线/平面拟合、单应性/本质/基础矩阵估计等。它的核心优势在于对大量局外点的鲁棒性。理解其思想并掌握其在具体问题中的应用，是进行相关领域开发的重要技能。

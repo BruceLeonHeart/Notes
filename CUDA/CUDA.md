@@ -1,8 +1,8 @@
+# CUDA 学习笔记
+
 ## Cuda中Grid Block的概念
 
-是的，你对 CUDA 中 grid (网格) 和 block (块) 的理解非常准确，将它们分别看作是 3D 立方体的线程集合和 3D 立方体的块集合，是一个非常直观和有用的类比！
-
-让我们来详细解释一下：
+可以将 block (块) 看作 3D 立方体的线程集合，将 grid (网格) 看作 3D 立方体的 block 集合，这是一个直观且有用的类比。
 
  1. Block (线程块)
 
@@ -61,24 +61,25 @@ CUDA 并行性之所以可扩展，是因为它们并非连续的块运行时依
 在核函数中，你经常需要计算当前线程在整个 grid 中的全局唯一 ID，以便处理数组中的特定元素。
 
 对于 1D 的情况：
-c++
-int globalthreadid = blockIdx.x  blockDim.x + threadIdx.x;
 
+```c++
+int globalthreadid = blockIdx.x * blockDim.x + threadIdx.x;
+```
 
 对于 2D 的情况（最常见用于图像处理或矩阵运算）：
-c++
-int col = blockIdx.x  blockDim.x + threadIdx.x; // 全局列索引
-int row = blockIdx.y  blockDim.y + threadIdx.y; // 全局行索引
 
+```c++
+int col = blockIdx.x * blockDim.x + threadIdx.x; // 全局列索引
+int row = blockIdx.y * blockDim.y + threadIdx.y; // 全局行索引
+```
 
 对于 3D 的情况：
-c++
-int x = blockIdx.x  blockDim.x + threadIdx.x;
-int y = blockIdx.y  blockDim.y + threadIdx.y;
-int z = blockIdx.z  blockDim.z + threadIdx.z;
 
-
-所以，你的理解完全正确，这个 3D 立方体的类比是理解 CUDA 执行模型的一个非常好的起点！
+```c++
+int x = blockIdx.x * blockDim.x + threadIdx.x;
+int y = blockIdx.y * blockDim.y + threadIdx.y;
+int z = blockIdx.z * blockDim.z + threadIdx.z;
+```
 
 
 ## Warp 概念 
@@ -118,15 +119,16 @@ int z = blockIdx.z  blockDim.z + threadIdx.z;
 
     示例：
 ```c++
-    global void myKernel(int data, int result) {
-        int tid = threadIdx.x + blockIdx.x  blockDim.x;
+    __global__ void myKernel(int data, int result) {
+        int tid = threadIdx.x + blockIdx.x * blockDim.x;
         if (tid % 2 == 0) { // 偶数线程
             result[tid] = data[tid]  2;
         } else { // 奇数线程
             result[tid] = data[tid] + 1;
         }
     }
-``` 
+```
+
     在这个例子中，一个 warp (32个线程) 中，一半的线程会走 if 分支，另一半走 else 分支。GPU 会先执行 if 分支的指令（偶数线程活跃，奇数线程禁用），然后执行 else 分支的指令（奇数线程活跃，偶数线程禁用）。这实际上相当于执行了两倍的工作量。
 
    优化： 尽量避免 warp 内部的条件分支，或确保 warp 内的线程都走同一条路径。
@@ -150,7 +152,7 @@ warp 是 CUDA 硬件执行线程的最小单位，通常包含 32 个线程。�
 
 使用 deviceQuery查看SM数目
 
-```bash
+```text
  -- Device 0: "NVIDIA GeForce RTX 3080"
   ...
   CUDA Capability Major/Minor version number: 8.6
@@ -226,4 +228,4 @@ CUDA Cores 的数量和 SM (Streaming Multiprocessor) 的数量不是一回事�
 
 所以，当你看到一个 GPU 有例如 100 个 SM 时，它的 CUDA Cores 数量会远远大于 100，具体数值取决于每个 SM 内部有多少个 CUDA Cores。
 
-例如，一个 Ampere 架构的 GPU 如果有 80 个 SM，那么它大约有 80  128 = 10240 个 CUDA Cores。
+例如，一个 Ampere 架构的 GPU 如果有 80 个 SM，那么它大约有 80 * 128 = 10240 个 CUDA Cores。

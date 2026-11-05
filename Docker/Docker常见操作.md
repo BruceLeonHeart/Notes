@@ -469,7 +469,11 @@ docker-compose top
 ```
 
 ### Docker Compose配置示例
+
+> 注：Compose v2 已不需要 version 字段，可省略。
+
 ```yaml
+# 注意：Compose v2 已不需要 version 字段，可省略
 version: '3.8'
 
 services:
@@ -581,8 +585,8 @@ sudo systemctl disable docker
 # 基础镜像
 FROM ubuntu:20.04
 
-# 维护者信息
-MAINTAINER yourname@example.com
+# 维护者信息（MAINTAINER 指令已废弃，官方推荐使用 LABEL 替代）
+LABEL maintainer="作者 <email>"
 
 # 设置工作目录
 WORKDIR /app
