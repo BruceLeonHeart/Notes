@@ -1,5 +1,9 @@
 # VS Code 中 Doxygen 格式代码注释的自动生成
 
+> 类型：command
+> 一句话：VSCode Doxygen 注释插件
+
+
 在 VS Code 中为 C++ 代码自动生成 Doxygen 风格的注释模板，最常用、最强大的方法是使用 Doxygen 文档注释插件。
 
 从代码注释风格（例如 `//! \brief`、`\param[in]`、`\return`）来看，这正是 Doxygen 的标准格式。Doxygen 是一个流行的 C++ 文档生成工具，可以从源代码中的特殊注释提取信息，生成专业的帮助文档。

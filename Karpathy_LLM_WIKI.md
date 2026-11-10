@@ -1,5 +1,9 @@
 # Karpathy 的 LLM Wiki 是什么
 
+> 类型：concept
+> 一句话：Karpathy LLM Wiki 构想
+
+
 这是 Andrej Karpathy 在 2026 年 4 月发布的一个 [gist 构想](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f)（5000+ star），核心是一句话：**知识"编译一次、持续维护"，而不是每次提问都从原始资料里临时检索（RAG）**。
 
 **它解决的痛点**：传统 RAG（上传文件 → 每次提问重新检索片段 → 临时拼答案）没有积累——交叉引用不会自己长出来，上次问过的结论不会沉淀，文档间的矛盾没人标记。

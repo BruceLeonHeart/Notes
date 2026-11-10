@@ -1,5 +1,9 @@
 # C++ `static` 与 `const` 关键字详解
 
+> 类型：concept
+> 一句话：static / const / constexpr 用法
+
+
 在 C++ 中，`static` 和 `const` 是两个非常重要的关键字，它们在不同的上下文中有不同的含义和用途。理解它们的用法对于编写高效、安全且易于维护的 C++ 代码至关重要。
 
 ---

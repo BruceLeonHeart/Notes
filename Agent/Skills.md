@@ -1,3 +1,6 @@
+> 类型：concept
+> 一句话：Agent Skills 库与 SOP 工作流
+
 Matt Pocock 的 `mattpocock/skills` 是一个专为真实工程环境设计的 **AI 代理技能库（Agent Skills）**。与那些试图包揽软件开发全流程的 AI 框架（如 GSD、BMAD 或 Spec-Kit）不同，该仓库强调**开发者的绝对控制权**与**工作流的可组合性**。它将人类几十年的传统软件工程经验（如 TDD、DDD）转化为 AI 可以理解和执行的标准操作程序（SOP）。
 
 ### 1. 核心设计理念与解决的四大痛点

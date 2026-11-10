@@ -1,5 +1,9 @@
 # C++ 列表初始化
 
+> 类型：concept
+> 一句话：C++ 列表初始化语法
+
+
 在 C++ 中，std::thread t(hello); 和 std::thread t{hello}; 都可以成功构建 std::thread 对象，这涉及 C++ 的两种不同的初始化语法：直接初始化（Direct Initialization）和列表初始化（List Initialization，也常被称为统一初始化 Uniform Initialization）。
 
  1. std::thread t(hello); - 直接初始化 (Direct Initialization)

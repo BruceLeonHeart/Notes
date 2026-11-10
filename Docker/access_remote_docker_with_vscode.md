@@ -1,5 +1,9 @@
 # 使用 VS Code 通过 SSH 访问远程服务器 Docker 容器
 
+> 类型：howto
+> 一句话：VSCode SSH 连远程容器
+
+
 在 VS Code 中通过 SSH 访问远程 Docker 容器是一个非常常见且高效的开发工作流。这允许你在本地使用 VS Code 的强大功能，同时在远程服务器的 Docker 容器中进行开发，保持环境的一致性。
 
 以下是详细的步骤和所需工具：

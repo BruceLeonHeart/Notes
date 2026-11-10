@@ -1,5 +1,9 @@
 # OpenClaw生态与SKILL
 
+> 类型：concept
+> 一句话：OpenClaw 生态与 SKILL 机制
+
+
 前置条件：OpenClaw 需要先安装 Node.js（用 `node -v` / `npm -v` 检查），可源码安装或使用云服务器自带环境，具体安装步骤见《服务器部署OpenClaw》。
 
 ## SKILL 原理

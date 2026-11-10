@@ -1,4 +1,8 @@
 # SMB协议个人整理笔记（纯Markdown，直接复制使用）
+
+> 类型：concept
+> 一句话：SMB 协议整理
+
 ## 一、核心概述
 SMB（Server Message Block，服务器消息块）：**局域网C/S文件资源共享协议**，微软主导，Windows原生内置
 - CIFS：是SMB1.0的旧名称，二者同源

@@ -57,11 +57,11 @@ Reducing repeated stuff and make life easier 😍
 - `SVN/SVN.md` — SVN 常用操作
 
 ### MATH
-- `MATH/study_plan.md` — 数学学习计划
-- `MATH/linear_algebra/` — 线性代数 21 讲（向量、矩阵、SVD、PCA、总复盘）
-- `MATH/multivariable_calculus/` — 高等数学 7 讲（偏导、梯度、Jacobian、Hessian、链式法则）
-- `MATH/optimization_theory/` — 优化理论 7 讲（最小二乘、梯度下降、牛顿法、LM、鲁棒核）
-- `MATH/probability_statistics/` — 概率统计 7 讲（分布、贝叶斯、高斯、条件概率）
+- `MATH/study_plan.md` — 数学学习计划（含全部阶段复盘摘要）
+- `MATH/linear_algebra/` — 线性代数讲次（向量、矩阵、SVD、PCA）
+- `MATH/multivariable_calculus/` — 高等数学讲次（偏导、梯度、Jacobian、Hessian、链式法则）
+- `MATH/optimization_theory/` — 优化理论讲次（最小二乘、梯度下降、牛顿法、LM、鲁棒核）
+- `MATH/probability_statistics/` — 概率统计讲次（分布、贝叶斯、高斯、条件概率）
 
 ### Python
 - `Python/uv_notes.md` — uv（Rust 写的 Python 包/项目管理工具）使用笔记
@@ -71,3 +71,19 @@ Reducing repeated stuff and make life easier 😍
 - `UML/*.puml` — Class / Sequence / State / Activity / Component / Deployment 图源码
 - `UML/activity_diagram_vs_sequence_diagram.md` — 活动图 vs 序列图
 - `DailyLife/social_security.md` — 社保笔记
+
+## 按问题反查
+
+> 按"我遇到什么问题"索引，不是按目录。只收真的会回头查的问题，不用穷举。
+
+- 忘了某个 git / docker / ros 命令怎么写 → 对应目录下 `*_common_operations.md`
+- C++ `static` / `const` 各种用法分不清 → `CXX/static_and_const_keywords.md`
+- C++ 引用到底是什么、和指针区别 → `CXX/references_explained.md`
+- 想做内存零拷贝优化 → `OS/zero_copy.md`
+- 光猫 / 路由器网段合并不通 → `OS/home_network_segment_merge.md`
+- Windows 共享 / Smb 配置 → `OS/smb_protocol_introduction.md`、`OS/windows_file_sharing_setup.md`
+- 远程服务器上用 VSCode 连 Docker 开发 → `Docker/access_remote_docker_with_vscode.md`
+- 用 valgrind / ASan 查内存问题 → `Embeded_dev/debugging_with_valgrind_and_asan.md`
+- Python 包管理 / 虚拟环境 / 换源 → `Python/uv_notes.md`
+- MATH 系列讲次学了什么、学到哪了 → `MATH/study_plan.md`（含全部阶段复盘摘要）
+- 服务器上部署 OpenClaw → `AI/openclaw/deploy_openclaw_on_server.md`

@@ -1,3 +1,6 @@
+> 类型：config
+> 一句话：Git bash alias 清单
+
 ## Git 偏好
 
 Linux下配置在用户下的.bashrc尾部添加git别名配置，减少字符数入量

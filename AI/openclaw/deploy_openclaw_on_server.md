@@ -1,5 +1,9 @@
 # 服务器部署OpenClaw
 
+> 类型：howto
+> 一句话：服务器上部署 OpenClaw
+
+
 ## 1. 安装openclaw
 
 这里使用云服务器自带openclaw

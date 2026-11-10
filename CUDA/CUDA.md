@@ -1,5 +1,9 @@
 # CUDA 学习笔记
 
+> 类型：concept
+> 一句话：CUDA 基础（Grid/Block/线程模型）
+
+
 ## Cuda中Grid Block的概念
 
 可以将 block (块) 看作 3D 立方体的线程集合，将 grid (网格) 看作 3D 立方体的 block 集合，这是一个直观且有用的类比。

@@ -1,3 +1,6 @@
+> 类型：howto
+> 一句话：valgrind / ASan 内存调试
+
 ## 如何使用 Valgrind / AddressSanitizer (ASan) 来分析是否存在 内存泄漏、越界访问和野指针
 
 在 C++ 开发中，**AddressSanitizer (ASan)** 和 **Valgrind** 是排查内存问题的两大神器。现代 C++ 开发通常优先使用 ASan（集成在编译器中，速度快），而在无法重新编译代码或需要深度排查未初始化变量时使用 Valgrind。

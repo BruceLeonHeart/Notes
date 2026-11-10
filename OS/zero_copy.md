@@ -1,5 +1,9 @@
 # 零拷贝 (Zero-Copy) 技术详解
 
+> 类型：concept
+> 一句话：零拷贝技术（mmap / sendfile / splice）
+
+
 ## 1. 什么是零拷贝？
 
 零拷贝 (Zero-Copy) 是一种 I/O 操作优化的思想。在计算机执行 I/O 操作时，其核心目标是**尽量减少或完全避免 CPU 将数据在内核空间 (Kernel Space) 和用户空间 (User Space) 之间进行不必要的复制**。

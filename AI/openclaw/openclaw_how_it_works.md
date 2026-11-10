@@ -1,4 +1,8 @@
 # OpenClaw运行机制
+
+> 类型：concept
+> 一句话：OpenClaw 运行机制（Gateway + channel）
+
 **QQ/钉钉/企业微信这些机器人插件（channel），不是独立客户端连远程OpenClaw服务端，而是内置在本地Gateway网关内部的适配器；用户在IM发消息 → 插件转成统一事件交给本地Gateway → Gateway拥有本机文件/工具权限，**委托执行**文件读取、Shell、LLM调用；配对码是用来校验「哪些IM用户有权限让Gateway替他执行操作」。**
 
 下文分架构、委托执行、配对码三层展开。

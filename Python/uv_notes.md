@@ -1,5 +1,9 @@
 # uv 使用笔记
 
+> 类型：command
+> 一句话：uv Python 包管理工具
+
+
 uv 是由 Astral（Ruff 的作者）用 Rust 编写的 Python 包与项目管理工具，目标是替代 pip / pip-tools / poetry / pyenv / virtualenv 等一整套传统工具链。典型安装后日常操作会比 pip 快 10~100 倍。
 
 ## 基础配置

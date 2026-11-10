@@ -1,5 +1,9 @@
 # C++ 文件输入/输出 (I/O) 流笔记
 
+> 类型：concept
+> 一句话：C++ fstream 文件 IO
+
+
 C++ 通过 `<fstream>` 头文件提供了一套强大的文件 I/O 功能。它主要基于三个类：
 
 -   `ofstream`: output file stream，用于向文件写入数据。
