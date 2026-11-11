@@ -47,6 +47,7 @@ Reducing repeated stuff and make life easier 😍
 - `ROS/ros_common_operations.md` — ROS 常用操作
 - `ROS/ros2_common_operations.md` — ROS2 常用操作
 - `Web/fullstack_introduction.md` — 全栈技术介绍
+- `Web/bff_backend_for_frontend.md` — BFF：多语言后端协同与通信规范
 
 ### Git / OS / SVN
 - `Git/git_common_operations.md` — Git 常见操作
