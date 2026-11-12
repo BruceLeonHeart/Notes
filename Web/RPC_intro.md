@@ -1,119 +1,103 @@
-# 现代 RPC 与底层网络通信核心知识笔记
+# RPC 与底层网络通信
 
----
+> 类型：concept
+> 一句话：RPC 是什么、gRPC 为什么选 HTTP/2、HTTP/3 为什么弃 TCP
 
-## 一、 RPC 的本质与核心思想
+## 是什么
 
-* **定义**：Remote Procedure Call（远程过程调用）。
-* **核心理念**：让程序跨网络调用远程服务器的代码时，在语法体验上**就像调用本地函数一样**，屏蔽底层的网络连接、协议打包和数据解析细节。
-* **存根模型（Stub）**：
-* `Client Stub`（客户端存根）：伪装成本地函数，负责将函数名和入参序列化（打包）成网络报文发送。
-* `Server Stub`（服务端存根）：接收网络报文并**反序列化（解包）**，调用真实的本地服务端函数，再将结果原路打回。
+RPC（Remote Procedure Call，远程过程调用）是一种交互模型：让程序跨网络调用远程服务器的代码时，语法体验上**就像调用本地函数一样**，屏蔽网络连接、协议打包、数据解析的细节。
 
+**存根（Stub）模型**：
 
-* **独立性**：RPC 只是架构思想，**绝不强制绑定 HTTP**。它可以跑在裸 TCP、本地 IPC（管道/共享内存）、WebSocket 甚至 UDP 上。
+- `Client Stub`（客户端存根）：伪装成本地函数，把函数名和入参序列化成网络报文发出。
+- `Server Stub`（服务端存根）：接收报文、反序列化，调用真实的本地函数，再把结果原路返回。
 
----
+**关键认知：RPC ≠ HTTP**。RPC 只是架构思想，不绑定传输层。它可以跑在裸 TCP、本地 IPC、WebSocket、UDP 上。当今最流行的 gRPC 默认选 HTTP/2 作底层，这容易让人误以为 RPC 就是 HTTP。
 
-## 二、 现代 RPC 的霸主：gRPC
+### RPC 的传输载体
 
-gRPC 是 Google 开源的工业级 RPC 框架，是当今云原生和跨微服务通信的事实标准。它依靠**三大技术基石**解决了传统 RPC 的臃肿问题：
+| 载体 | 特点 | 典型场景 |
+| --- | --- | --- |
+| HTTP/1.1 / HTTP/2 / HTTP/3 | 兼容性最强，穿透网关防火墙首选 | gRPC、RESTful API |
+| 裸 TCP | 省略 HTTP 头，自定义二进制包体，追求极限吞吐 | Dubbo、MMO 游戏服务器 |
+| 本地 IPC（Unix Domain Socket / stdio 管道） | 同机部署时绕过 TCP/IP 协议栈和网卡，微秒级延迟 | LSP、MCP、gRPC 本地模式 |
+| WebSocket | 全双工、有状态持久长连接 | 事件推送（飞书机器人）、区块链订阅 |
+| UDP / QUIC | 无连接、低延迟，自行实现重传 | 竞技游戏、音视频信令 |
 
-1. **强类型契约与二进制序列化（Protobuf）**：
-* 必须先编写 `.proto` 接口定义文件（Contract First）。
-* 利用该文件自动为 Python、C++、Rust、TS 生成客户端和服务端代码。
-* 数据压缩为极致紧凑的二进制格式，体积仅为 JSON 的 1/3 ~ 1/10，解析速度极快。
+### 现代 RPC 框架生态
 
+- **gRPC**（Google）：工业级标准，强类型契约 + Protobuf 二进制 + HTTP/2 多路复用。
+- **tRPC**：全栈 TypeScript 生态，用 TS 泛型自动生成类型，底层跑 HTTP/JSON，无需写 `.proto`。
+- **Apache Dubbo**（阿里 Java 系）：裸 TCP 高并发。
+- **Kitex**（字节 Go）：配合 Thrift。
+- **tRPC / bRPC**（腾讯/百度 C++）：海量并发低延迟。
+- **JSON-RPC 2.0**：极简 JSON 文本约定，字段为 `jsonrpc` / `method` / `params` / `id`。
 
-2. **默认底层传输通道（HTTP/2）**：
-* 享受 HTTP/2 的**多路复用**（一条长连接并发跑多个请求，解决队头阻塞）、**头部压缩**（HPACK）。
-* 天然兼容现代防火墙、云网关与负载均衡器。
+## 为什么
 
+### 为什么 gRPC 选 HTTP/2 而不是裸 TCP
 
-3. **四种原生通信模式**：
-* 一元调用（一问一答）、服务端流式（Server Streaming）、客户端流式（Client Streaming）、双向全双工流式。
+裸 TCP 更快，但 Google 设计 gRPC 时坚定选择 HTTP/2，核心是**基础设施兼容性**：
 
+1. **穿透防火墙与网关**：企业内网防火墙、云负载均衡（ALB/NLB）、反向代理（Nginx、Envoy）默认放行 HTTP；私有 TCP 协议往往需要额外配置网关转发。
+2. **复用现成生态**：TLS 证书、链路追踪、鉴权 Header、多路复用机制全部现成，不用在基础设施层重复造轮子。
 
+### 为什么 HTTP/3 抛弃 TCP 转向 UDP
 
-### 📌 gRPC 与 RESTful API 的对比选型
+TCP 面向连接、绝对可靠，但高并发弱网下有三大缺陷：
+
+- **队头阻塞（Head-of-Line Blocking）**：HTTP/2 虽然在一条 TCP 连接上并发多请求，但底层 TCP 是单条有序字节流。丢 1 个包，后面所有已到达的包都要死等重传，整个连接卡死。
+- **握手延迟高**：HTTPS 要先 TCP 三次握手、再 TLS 握手，好几个 RTT 才能发业务数据。
+- **连接迁移难**：手机 Wi-Fi 切 5G 时 IP 变了，TCP 连接必须断开重连。
+
+HTTP/3 在 UDP 之上用 **QUIC** 在用户态重新实现加密（TLS 1.3）、丢包重传、拥塞控制：多条流独立（A 流丢包不影响 B 流）、0-RTT 建连、用 Connection ID 代替 IP 实现无缝迁移。
+
+### JSON-RPC 为什么在轻量场景不可替代
+
+gRPC 在大型微服务中占主导，但 JSON-RPC 2.0 在三个领域是行业标准：
+
+1. **AI 工具链与 IDE**：MCP（大模型连接本地环境）、LSP（VS Code 通过 stdio 管道与语言分析进程通信）。
+2. **区块链 / Web3**：以太坊、Solana 的节点 API（如 `eth_getBalance`）。
+3. **本地跨语言脚本**：Node 拉起 Python 子进程，通过 stdin/stdout 逐行互发 JSON-RPC，零环境依赖。
+
+## 例子
+
+### gRPC vs RESTful 选型
 
 | 维度 | gRPC | RESTful (HTTP/JSON) |
 | --- | --- | --- |
-| **传输层** | 强制 HTTP/2 | 通常 HTTP/1.1 (或 H2) |
-| **载体/类型** | Protobuf 二进制 (强契约 `.proto`) | JSON 纯文本 (无强制静态约束) |
-| **开销/体积** | 极小，解析占用 CPU 极低 | 较大，高并发下频繁解析 JSON 极耗 CPU |
-| **最佳场景** | 内部微服务通信、高频实时流、IoT/移动端上行 | 对外开放平台、纯前端 Web 请求、快速抓包调试 |
+| 传输层 | 强制 HTTP/2 | 通常 HTTP/1.1 |
+| 载体 | Protobuf 二进制（强契约 `.proto`） | JSON 纯文本（无静态约束） |
+| 体积/开销 | 极小，JSON 的 1/3 ~ 1/10 | 较大，高并发下解析 JSON 耗 CPU |
+| 通信模式 | 一元 / 服务端流 / 客户端流 / 双向流 | 请求-响应 |
+| 最佳场景 | 内部微服务、高频实时流、IoT 上行 | 对外开放平台、前端 Web 请求、抓包调试 |
 
----
+### TCP vs UDP
 
-## 三、 RPC 的多样化生态图谱
+| 维度 | TCP | UDP |
+| --- | --- | --- |
+| 连接 | 面向连接，三次握手 / 四次挥手 | 无连接，知道 IP+端口直接发 |
+| 可靠性 | ACK、超时重传、按序到达，不丢不重 | 尽力而为，可能丢包乱序 |
+| 开销 | 首部 ≥20 字节，有流量/拥塞控制 | 首部 8 字节，无握手无重传 |
+| 场景 | 网页、文件下载、数据库同步 | 视频通话、游戏、直播、DNS |
 
-虽然提到 RPC 默认多指 gRPC，但在特定领域有其他霸主：
+### HTTP 版本协商
 
-* **全栈 TypeScript 生态：tRPC**
-* 无需写 `.proto` 文件，利用 TS 泛型，前端调用后端函数时自动带出类型提示，底层跑的是 HTTP/JSON。
+网站不写死版本，接入层（Nginx/Envoy/CDN）开多版本支持，浏览器自动谈判：
 
+1. **ALPN 协商**：首次 TCP+TLS 握手时协商，默认先建 HTTP/2。
+2. **Alt-Svc 广告**：服务器在 HTTP/2 响应头夹带 `Alt-Svc: h3=":443"; ma=86400`，告诉浏览器"下次可以走 UDP 443 的 HTTP/3"。
+3. **自动降级**：浏览器后台尝试 QUIC，若 UDP 被防火墙屏蔽则瞬间回退 HTTP/2，用户无感知。
 
-* **企业级自研生态（裸 TCP 高并发）**：
-* **Java (阿里系)**：Apache Dubbo。
-* **Go (字节跳动)**：Kitex (配合 Thrift)。
-* **C++ (腾讯/百度)**：tRPC、bRPC（专为海量并发和低延迟优化）。
+YouTube 几乎全量 HTTP/3（QUIC 本就是 Google 为 YouTube 发明的）；B 站重点在视频 CDN 和移动端用 HTTP/3，Web API 仍走 HTTP/2（国内运营商对大流量 UDP 有 QoS 限速）。
 
+浏览器验证：F12 → Network 面板 → 表头右键勾选 Protocol 列，看 `h3` / `h2` / `http/1.1`。
 
-* **轻量级无依赖标准：JSON-RPC**
-* 仅是一套极简的 JSON 文本约定（当前为 2.0 规范）。包含 `jsonrpc`、`method`、`params`、`id` 字段。
+## 坑
 
-
-
----
-
-## 四、 JSON-RPC：轻量场景的绝对统治者
-
-JSON-RPC 虽然在大型微服务中被 gRPC 压制，但在以下三大领域是行业绝对标准：
-
-1. **AI 工具链与 IDE 底层**：
-* **MCP (Model Context Protocol)**：大模型连接本地环境的底层标准。
-* **LSP (Language Server Protocol)**：VS Code 等编辑器通过本地 IPC（`stdio` 管道）收发 JSON-RPC 与底层语言分析进程通信。
-
-
-2. **区块链 / Web3 节点**：
-* 以太坊、Solana 等公链暴露的 API 均为 JSON-RPC（如 `eth_getBalance`）。
-
-
-3. **本地跨语言脚本拉起**：
-* 如 Node.js 启动 Python 子进程，通过父子进程的标准输入输出管道逐行互发 JSON-RPC 字符串，零环境依赖。
-
-
-
----
-
-## 五、 底层网络通信手段（RPC 的载体）
-
-RPC 的下层是传输管道，主要根据物理隔离程度进行选择：
-
-1. **HTTP (HTTP/1.1, H2, H3)**：兼容性最强，穿透网关与防火墙首选（gRPC、REST 使用）。
-2. **裸 TCP**：省略 HTTP 冗长协议头，定义私有二进制包体，追求极限吞吐（Dubbo 使用）。
-3. **本地 IPC (进程间通信)**：
-* `Unix Domain Socket` 或 `stdio` 管道。
-* 当多个服务部署在**同一台物理机**时使用，完全绕过 TCP/IP 协议栈和网卡，达到微秒级延迟。
-
-
-4. **WebSocket**：
-* 用于全双工、有状态的持久长连接。
-* **反向事件推送（如飞书 WebSocket）**：不是 REST，属于事件驱动的 Pub/Sub 模式。企业内网服务器主动连飞书云端，云端顺着长连接将事件推送下来，穿透企业内网 NAT 防火墙。
-
-
-
----
-
-## 六、 HTTP 与底层 TCP/UDP 的演进路线
-
-* **HTTP/1.1 与 HTTP/2（建立在 TCP 之上）**
-* **TCP 缺陷**：建立在“面向连接、绝对可靠”的基础上。握手极其耗时；高并发下存在**队头阻塞（Head-of-Line Blocking）**（丢失 1 个数据包，整个连接的所有流必须死等重传）。
-
-
-* **HTTP/3 与 QUIC（建立在 UDP 之上）**
-* **弃用 TCP**：为根治队头阻塞，HTTP/3 底层改用 **UDP**。
-* **QUIC 协议**：在用户态（User Space）基于无连接的 UDP 重新实现加密（TLS 1.3）、丢包重传和拥塞控制。
-* **优势**：0-RTT 极速建连；连接内部多条流互相独立（丢包不影响其他流）；支持连接平滑迁移（手机 Wi-Fi 切 5G，靠 Connection ID 识别，无缝切换不断线）。
-* **现状**：YouTube、Bilibili 等大型视频平台已全面铺开使用，通过 Nginx/Envoy 接入层与浏览器自动进行 ALPN 与 `Alt-Svc` 协商。
+- **RPC ≠ HTTP**：这是最常见的误解。RPC 是架构思想，HTTP 只是它的一种载体。把 RPC 等同于 HTTP 会忽略 Dubbo/Thrift 的裸 TCP 模式和 LSP/MCP 的 stdio IPC。
+- **HTTP/2 的多路复用没解决队头阻塞**：HTTP/2 在应用层并发了，但底层 TCP 丢一个包所有流都卡死。真正解决要等 HTTP/3/QUIC。
+- **QUIC 被防火墙挡**：很多企业/校园网限速或屏蔽 UDP 443，HTTP/3 会自动降级回 HTTP/2，不要假设所有用户都走 h3。
+- **Protobuf 契约是强约束**：`.proto` 改了字段没同步生成代码，跨语言调用直接崩。CI 里要跑契约检查。
+- **JSON-RPC 没有内置传输层安全**：它只是报文格式，安全靠底层（HTTPS / SSH 隧道 / 本地管道）。把 JSON-RPC 直接暴露在公网 HTTP 上等于裸奔。
+- **本地 IPC 不是万能**：Unix Domain Socket 和 stdio 管道只在同机部署时可用，跨机必须走 TCP/HTTP。

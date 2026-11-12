@@ -52,9 +52,11 @@ Reducing repeated stuff and make life easier 😍
 - `Web/bff_backend_for_frontend.md` — BFF：多语言后端协同与通信规范
 - `Web/Django_intro.md` — Django 入门：ORM、Admin、Auth 三大内置特性
 - `Web/hybrid_desktop_app_frameworks_intro.md` — Tauri vs Electron 跨平台桌面框架对比
+- `Web/RPC_intro.md` — RPC 与底层网络通信（gRPC / JSON-RPC / HTTP/3）
 
 ### Git / OS / SVN
 - `Git/git_common_operations.md` — Git 常见操作
+- `Git/github_cli_and_token_autosave.md` — GitHub CLI 与 Token 免密配置
 - `OS/smb_protocol_introduction.md` — Smb 协议介绍
 - `OS/windows_file_sharing_setup.md` — Windows 共享实战
 - `OS/home_network_segment_merge.md` — 光猫 / 路由器合并网段
@@ -92,3 +94,5 @@ Reducing repeated stuff and make life easier 😍
 - Python 包管理 / 虚拟环境 / 换源 → `Python/uv_notes.md`
 - MATH 系列讲次学了什么、学到哪了 → `MATH/study_plan.md`（含全部阶段复盘摘要）
 - 服务器上部署 OpenClaw → `AI/openclaw/deploy_openclaw_on_server.md`
+- 服务器无浏览器免密推 GitHub → `Git/github_cli_and_token_autosave.md`
+- gRPC vs REST 怎么选、HTTP/3 为什么用 UDP → `Web/RPC_intro.md`

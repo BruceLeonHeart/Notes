@@ -1,8 +1,17 @@
-## 一、GitHub CLI (`gh`) 的安装与使用
+# GitHub CLI 与 Token 免密配置
+
+> 类型：howto
+> 一句话：服务器上用 gh / Token / SSH 三种方式免密推 GitHub
+
+## 场景
+
+服务器上没有浏览器，`git push` 又不能用密码（GitHub 已禁用 HTTPS 密码认证），需要配置免密拉取/推送。
 
 GitHub CLI（命令行工具 `gh`）允许你在终端直接管理仓库、Pull Request、Issue 和 GitHub Actions，无需频繁切换浏览器。
 
-### 1. 安装方法
+## 步骤
+
+### 安装 gh
 
 * **Ubuntu / Debian**：
 ```bash
@@ -41,7 +50,7 @@ winget install --id GitHub.cli
 
 安装完成后运行 `gh --version` 验证。
 
-### 2. 登录认证
+### 登录认证
 
 在本地有浏览器的环境直接运行交互式登录：
 
@@ -52,7 +61,7 @@ gh auth login
 
 按提示依次选择 `GitHub.com` -> `HTTPS`（或 `SSH`）-> `Login with a web browser` 即可完成授权。若在无浏览器的纯命令行服务器上，可使用 Token 登录（见下文方案一）。
 
-### 3. 高频常用命令
+### 高频命令
 
 * **仓库管理**：
 * `gh repo clone owner/repo`：克隆仓库（无需写完整 URL）
@@ -75,19 +84,19 @@ gh auth login
 
 ---
 
-## 二、在服务器上配置 GitHub Token 实现免密操作
+### 服务器免密配置（无浏览器环境）
 
 由于 GitHub 已禁用密码验证 HTTPS 操作，在服务器上需要使用 **Personal Access Token (PAT)**。
 
-### 第 1 步：生成 GitHub Token
+#### 1. 生成 GitHub Token
 
 1. 登录 GitHub 网页端，进入右上角头像 -> **Settings** -> 左侧最底部 **Developer settings**。
 2. 选择 **Personal access tokens** -> **Tokens (classic)**（或 Fine-grained tokens）-> **Generate new token**。
 3. 勾选 `repo`（完整仓库读写权限），生成后**立即复制保存**（`ghp_xxx` 开头，页面关闭后无法再次查看）。
 
-### 第 2 步：在服务器上持久化配置（任选其一）
+#### 2. 持久化配置（任选其一）
 
-#### 方案一：通过 `gh` 自动接管 Git 凭证（推荐）
+**方案一：通过 `gh` 自动接管 Git 凭证（推荐）**
 
 如果服务器已安装 `gh`，直接用 Token 登录并关联 Git，后续所有 `git pull` / `git push` 都会自动走 `gh` 认证：
 
@@ -97,7 +106,7 @@ gh auth setup-git
 
 ```
 
-#### 方案二：使用 Git 原生 `credential.helper store`（无需额外软件）
+**方案二：使用 Git 原生 `credential.helper store`（无需额外软件）**
 
 让 Git 将凭证持久化保存在用户主目录的隐藏文件中：
 
@@ -120,7 +129,7 @@ git config --global credential.helper store
 
 *(注：如果用户名中包含 `@` 等特殊字符，需替换为 URL 编码 `%40`，否则建议通过第 2 步让 Git 自动写入。)*
 
-#### 方案三：配置 SSH 密钥（生产服务器最佳实践）
+**方案三：配置 SSH 密钥（生产服务器最佳实践）**
 
 如果服务器长期用于拉取或部署代码，使用 SSH 密钥比 HTTPS Token 更安全，且不会因 Token 过期而中断服务：
 
@@ -147,4 +156,18 @@ git remote set-url origin git@github.com:用户名/仓库名.git
 
 
 
-在多人共用的服务器上使用方案二时，务必执行 `chmod 600 ~/.git-credentials` 限制文件权限，防止同机器其他用户读取你的明文 Token。
+## 结果
+
+```bash
+gh auth status          # 确认 gh 登录状态
+git pull && git push    # 免密成功
+```
+
+## 踩过的坑
+
+- **`~/.git-credentials` 是明文**：方案二把 Token 明文写在主目录，多人共用的服务器必须 `chmod 600 ~/.git-credentials`，否则同机器其他用户能直接读到你的 Token。
+- **用户名含 `@` 要 URL 编码**：手动写 `~/.git-credentials` 时，`https://user:token@github.com` 里的 `user` 若含 `@` 要写成 `%40`，否则解析错乱。建议让 Git 自动写入而不是手写。
+- **Token 过期导致推送突然失败**：classic Token 默认 90 天过期，fine-grained Token 可设更长。生产服务器优先用方案三（SSH 密钥不过期）。
+- **Token 权限给太大**：`repo` 勾选项是完整仓库读写，单个部署项目应建 fine-grained Token 只授权目标仓库，或用 SSH Deploy keys 限制为单仓库。
+- **`gh auth setup-git` 只对当前仓库生效**：它配置的是 `gh` 作为 credential helper，换机器或新仓库要重新跑。
+- **`winget install` 在旧 Windows 上没有**：Windows 10 1709 以下没有 winget，需用 Scoop 或下载 MSI 安装包。
