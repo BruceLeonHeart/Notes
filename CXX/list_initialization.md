@@ -73,3 +73,11 @@ MyClass obj{}; // 这明确地定义了一个 MyClass 类型的对象 obj，并�
    std::thread t{hello}; 是列表初始化，但由于 std::thread 没有匹配的 std::initializer_list 构造函数，它会回退到执行直接初始化，最终效果与第一种写法相同。
 
 在现代 C++ 编程中，推荐使用列表初始化 {}，因为它更统一、更安全（防止窄化转换），并能避免“最令人头疼的解析”问题。
+
+## 坑
+
+- **窄化转换直接编译报错**：`int x{3.14};` 是编译错误（double→int 丢精度），但 `int x = 3.14;` 只是警告；老代码批量切到 `{}` 时会冒出一堆原本能编过的窄化错误。
+- **`{}` 优先匹配 `initializer_list` 构造函数**：`vector<int> v{10}` 是塞一个 10 进去（长度 1），而 `vector<int> v(10)` 才是长度 10 的默认 vector——两者含义完全不同，容易写错。
+- **`auto x{1}` 的类型是 `initializer_list<int>` 不是 `int`**：C++11 的 `auto` 推导规则对花括号特例化，`auto x{1};` 之后不能再当 int 用（C++14 起 `auto x{1}` 已是 int，但 `auto x = {1}` 仍是 initializer_list）。
+- **`{}` 并不能完全解决 most vexing parse**：`MyClass obj{}` 是对象，但 `func({})` 在某些上下文仍可能被解析成临时量传参，要看构造函数是否有 initializer_list 重载。
+- **有 initializer_list 构造函数时 `()` 和 `{}` 行为分裂**：如 `std::vector<int>({1,2})` 与 `std::vector<int>{1,2}` 等价，但 `vector(size_type, const T&)` 与 `vector(initializer_list)` 同时存在时，`v(10, 1)` 与 `v{10, 1}` 含义完全不同，读代码时必须看清括号种类。

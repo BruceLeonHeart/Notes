@@ -421,55 +421,57 @@ docker run --tmpfs /tmp:rw,noexec,nosuid,size=100m nginx
 
 ## Docker Compose
 
+> Compose v2 起命令为 `docker compose`（空格，插件形式），v1 的 `docker-compose`（连字符）已废弃。以下示例统一写为 v2 语法。
+
 ### 基本操作
 ```bash
 # 启动服务
-docker-compose up
+docker compose up
 
 # 后台启动服务
-docker-compose up -d
+docker compose up -d
 
 # 停止服务
-docker-compose down
+docker compose down
 
 # 停止并删除数据卷
-docker-compose down -v
+docker compose down -v
 
 # 重启服务
-docker-compose restart
+docker compose restart
 
 # 查看服务状态
-docker-compose ps
+docker compose ps
 
 # 查看服务日志
-docker-compose logs
+docker compose logs
 
 # 实时查看日志
-docker-compose logs -f
+docker compose logs -f
 
 # 查看特定服务的日志
-docker-compose logs -f web
+docker compose logs -f web
 
 # 构建服务
-docker-compose build
+docker compose build
 
 # 构建并启动服务
-docker-compose up --build
+docker compose up --build
 
 # 重新构建服务
-docker-compose build --no-cache
+docker compose build --no-cache
 
 # 执行服务中的命令
-docker-compose exec web bash
+docker compose exec web bash
 
 # 在服务中运行一次性命令
-docker-compose run web python script.py
+docker compose run web python script.py
 
 # 扩展服务
-docker-compose up -d --scale web=3
+docker compose up -d --scale web=3
 
 # 查看服务资源使用情况
-docker-compose top
+docker compose top
 ```
 
 ### Docker Compose配置示例

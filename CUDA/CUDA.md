@@ -126,7 +126,7 @@ int z = blockIdx.z * blockDim.z + threadIdx.z;
     __global__ void myKernel(int data, int result) {
         int tid = threadIdx.x + blockIdx.x * blockDim.x;
         if (tid % 2 == 0) { // 偶数线程
-            result[tid] = data[tid]  2;
+            result[tid] = data[tid] * 2;
         } else { // 奇数线程
             result[tid] = data[tid] + 1;
         }
@@ -233,3 +233,11 @@ CUDA Cores 的数量和 SM (Streaming Multiprocessor) 的数量不是一回事�
 所以，当你看到一个 GPU 有例如 100 个 SM 时，它的 CUDA Cores 数量会远远大于 100，具体数值取决于每个 SM 内部有多少个 CUDA Cores。
 
 例如，一个 Ampere 架构的 GPU 如果有 80 个 SM，那么它大约有 80 * 128 = 10240 个 CUDA Cores。
+
+## 坑
+
+- **block 维度有硬上限**：每个 block 最多 1024 个线程（x/y/z 乘积），且 x 方向上限 1024、y/z 上限 1024；写 `dim3(2048, 16)` 直接启动失败，要用 grid 切分。
+- **`__syncthreads()` 必须 block 内所有线程到达**：把同步调用放在 `if (threadIdx.x < N)` 分支里会让没进分支的线程永远等，直接死锁；同步点必须对所有线程可达。
+- **共享内存 bank conflict**：一个 warp 内多个线程访问同一 bank 的不同字时会串行化，性能掉几倍；按 `threadIdx.x % 32` 错位 padding 或按 bank 轮转访问可避免。
+- **cudaMemcpy 方向搞反**：`cudaMemcpy(dst, src, size, cudaMemcpyHostToDevice)` 参数顺序是 dst/src，写反（尤其是 DeviceToHost）会把主机内存覆写或读到错数据，且通常不立即报错。
+- **寄存器溢出到 local memory**：kernel 里局部数组/太多变量会被编译器放到片外 local memory（名字像 local 其实在显存），性能掉一个数量级；用 `__launch_bounds__` 和 `nvcc -Xptxas -v` 看寄存器用量。

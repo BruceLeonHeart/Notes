@@ -36,25 +36,16 @@ docker pull gaoxiang12/slambook2:bionic
 ```
 
 ## 步骤 3: 启动容器并挂载代码目录
-这是最关键的一步。我们使用 docker run 命令启动一个容器，并通过 -v 参数将主机上的代码目录“链接”到容器内部的一个目录。
+这是最关键的一步：用 SLAM 镜像启动容器，通过 `-v` 参数把主机上的代码目录挂载进容器，实现"主机编辑、容器编译"。
 
 ```bash
-# 语法: -v /path/on/host:/path/in/container
 # 请将下面的 <你本地的代码路径> 替换为真实的绝对路径
-
 docker run -it --rm \
   -v <你本地的代码路径>/slambook2:/root/slambook2 \
   gaoxiang12/slambook2:bionic
 ```
-让我们分解一下这个命令：
 
-* -it: 启动一个交互式的终端 (interactive TTY)，这样你就可以在容器里敲命令了。
-* --rm: 当容器退出时，自动删除它。这对于临时的开发会话很方便，可以避免产生很多无用的旧容器。
-* -v <你本地的代码路径>/slambook2:/root/slambook2: 卷挂载。
-    - 冒号前面是你主机上的绝对路径。
-    - 冒号后面是你想映射到容器内部的路径。
-    - 执行后，你在主机上对 <你本地的代码路径>/slambook2 目录下的任何文件修改，都会实时同步到容器内的 /root/slambook2 目录，反之亦然。
-* gaoxiang12/slambook2:bionic: 指定要使用的镜像。  
+> `-v 主机路径:容器路径` 的完整语法（只读挂载、单文件挂载、数据卷等）详见 docker_common_operations.md 的「存储操作」一节。挂载后主客两端文件实时双向同步。
 
 执行成功后，你的终端提示符会变成类似 root@xxxxxxxxxxxx:/# 的样子，这表示你已经进入了容器的命令行环境。
 
@@ -84,6 +75,8 @@ make -j4 # -j4 表示使用4个核心并行编译，可以加快速度
 
 ## 工作流程二：VS Code + Remote - Containers 插件（推荐）
 这个方法将上述流程无缝集成到了 VS Code 中，体验极佳，是目前的主流选择。
+
+> 注意：本节是本地 Docker 容器的 Attach 场景；如果 Docker 跑在远程服务器上、需要通过 SSH 连上去再 Attach 容器，详见 access_remote_docker_with_vscode.md。
 
 ## 步骤 1: 安装必备软件
 1. Docker Desktop (Windows/Mac) 或 Docker Engine (Linux)。
@@ -198,4 +191,5 @@ docker run -it --rm \
 
 ## 相关
 
-- 使用 VS Code 访问远程服务器 Docker（见同目录 [使用vscode访问远程服务器Docker.md](./使用vscode访问远程服务器Docker.md)）
+- 卷挂载完整语法：docker_common_operations.md「存储操作」一节
+- 使用 VS Code 访问远程服务器 Docker（SSH 远程容器 Attach 场景）：[access_remote_docker_with_vscode.md](./access_remote_docker_with_vscode.md)

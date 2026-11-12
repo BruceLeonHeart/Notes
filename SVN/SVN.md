@@ -245,6 +245,21 @@ svn log -l 5        # 只显示最近5条日志
 svn log -r 100:HEAD # 显示从版本100到最新版本之间的日志
 ```
 
+#### 4. svn blame (praise/annote) - 查看每行最后修改者
+
+- **作用**：逐行显示文件内容，并在每行前标注最后一次修改它的作者和版本号，用来定位"这行是谁、在哪个版本改的"。
+- **语法**：
+
+```bash
+svn blame <file>
+```
+
+- **示例**：
+
+```bash
+svn blame main.cpp     # 输出形如：  12   alice  int x = 0;
+```
+
 ### D. 解决冲突 / 回滚
 
 #### 1. svn revert - 撤销本地修改
@@ -278,7 +293,8 @@ svn revert . --depth=infinity   # 递归撤销当前目录下所有修改（慎�
 3. 保存文件后，执行以下命令通知 SVN 冲突已解决：
 
 ```bash
-svn resolved <文件路径>
+svn resolved <文件路径>              # 旧写法，手动解决完后标记冲突已解决
+svn resolve --accept working <文件路径>  # 新写法，等价于 resolved，保留当前工作副本内容
 ```
 
 **解决方法2：选择特定版本**
@@ -321,6 +337,13 @@ svn cp https://svn.example.com/repos/my_project/trunk \
 ```
 
 - **说明**：分支和标签在 SVN 中本质上都是目录复制，但约定俗成地放在 branches 和 tags 目录下。
+
+- **仓库根简写**：`^/` 代表仓库根目录（^ 在 shell 中无需转义），日常分支实战可以简写为：
+
+```bash
+svn copy ^/trunk ^/branches/feature-x -m "create branch"  # 从 trunk 创建 feature-x 分支
+svn switch ^/branches/feature-x                            # 把当前工作副本切到该分支
+```
 
 #### 2. svn switch (sw) - 切换分支
 
@@ -385,6 +408,18 @@ svn cleanup [工作副本路径]
 ```bash
 svn cleanup .  # 清理当前目录
 ```
+
+#### 3. svn:ignore - 设置忽略规则
+
+- **作用**：让 SVN 忽略 build 产物、日志等不纳入版本控制的目录或文件（类似 .gitignore）。
+- **语法**：
+
+```bash
+svn propset svn:ignore "build" .          # 简单写法：忽略当前目录下的 build 目录
+svn propedit svn:ignore <dir>             # 进阶写法：打开编辑器维护多行忽略规则（需配置编辑器）
+```
+
+- **注意**：`svn:ignore` 是目录属性，设置后需要 `svn commit` 提交属性变更；只对当前目录的直接生效，不递归到子目录。
 
 ## 三、推荐目录结构与关键概念
 

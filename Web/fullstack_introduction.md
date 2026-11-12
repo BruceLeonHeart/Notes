@@ -25,18 +25,14 @@
         - NoSQL数据库：MongoDB、Redis、Cassandra、HBase等
     - Web服务器：Apache、Nginx、IIS等
 
-- 运维DevOps：
-    - 部署：Docker、Kubernetes
+- 运维 / DevOps：
+    - 容器与编排：Docker、Kubernetes
+    - Web 服务器 / 反向代理：Nginx
     - 监控：Prometheus、Grafana
-    - CI/CD 自动化：Jenkins、CircleCI、Github Actions、GitLab CI、Travis CI
-    - 服务器：AWS、Azure、Google Cloud等云服务
-
+    - CI/CD：Jenkins、CircleCI、GitHub Actions、GitLab CI
+    - 云平台：AWS、Azure、Google Cloud
 - 消息队列：Kafka、RabbitMQ
 - 服务发现：Eureka、Consul
-- DevOps：Docker、Kubernetes、Nginx
-- 部署：Docker、Kubernetes、Nginx
-
-- 运维：Prometheus、Grafana
 
 
 

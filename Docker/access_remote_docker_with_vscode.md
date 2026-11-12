@@ -83,3 +83,11 @@
    安装扩展：你可以在这个连接到容器的 VS Code 窗口中安装“推荐的”或“常用”的扩展。这些扩展会安装在容器内部的 VS Code Server 上，而不是你的本地机器上。
 
 这个工作流极大地简化了远程开发和容器化应用的调试，提供了本地开发体验的便利性，同时利用了远程服务器和 Docker 容器的强大功能。
+
+## 踩过的坑
+
+- **SSH config 别名必须配好**：Remote-SSH 列表里的主机来自 `~/.ssh/config`，只靠命令行 `ssh user@ip` 能连、但 VS Code 面板里找不到对应主机；先在 config 里写好 `Host` 别名再连。
+- **容器内要预装基础工具**：VS Code Server 首次 Attach 时要在容器里下载并解压 server 包，容器内没有 `curl`/`wget`/`tar`/`bash`（distroless 镜像尤其如此）会直接装不上；镜像里要带上这些基础工具。
+- **容器内 UID 与宿主机不一致导致挂载文件权限错**：`-v` 挂载的 bind mount 文件 owner 是宿主机 UID，容器内默认 root（UID 0）能读写但开发用户（如 1000）不能；要么 Dockerfile 里建同 UID 的用户，要么挂载时 `--user $(id -u):$(id -g)`。
+- **Server 下载慢要走代理**：容器访问 `update.code.visualstudio.com` 在国内网络下经常超时，Attach 卡住；可在容器里设 `HTTP_PROXY` 或预先把 server 包解压进镜像。
+- **Dev Container 扩展和 Remote-SSH 别混**：`Attach Visual Studio Code` 依赖 Dev Containers 扩展，只装了 Remote-SSH 是看不到右键菜单的；两个扩展都要装。

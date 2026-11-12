@@ -116,6 +116,21 @@ git rebase --abort
 git rebase --continue
 ```
 
+### 摘录提交（cherry-pick）
+```bash
+git cherry-pick <commit>              # 把某个提交摘出来应用到当前分支
+git cherry-pick A..B                  # 摘一段连续提交（A 不含、B 含）到当前分支
+```
+
+### 二分查找引入 bug 的提交（bisect）
+```bash
+git bisect start                      # 开始二分查找
+git bisect bad <commit>               # 标记当前（或指定）提交为坏提交
+git bisect good <commit>              # 标记某个旧提交为好提交，Git 自动检出中间版本
+# 反复测试当前检出的版本，依次 git bisect bad / git bisect good，直到定位到首个坏提交
+git bisect reset                      # 查找结束，切回原分支
+```
+
 ## 远程操作
 
 ### 查看远程仓库

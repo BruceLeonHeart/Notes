@@ -1,3 +1,5 @@
+# valgrind / ASan 内存调试
+
 > 类型：howto
 > 一句话：valgrind / ASan 内存调试
 
@@ -84,3 +86,11 @@ Valgrind 会在程序结束时输出一份 `HEAP SUMMARY`，重点关注以下�
 
 **最佳实践**：
 日常开发和持续集成（CI）环境中，默认开启 **ASan**。当遇到某些极其诡异的未初始化值引发的 Bug，或者拿到了一个无法获取源码、无法重新编译的第三方动态库发生崩溃时，再掏出 **Valgrind** 进行深度扫描。**注意：这两种工具原理互斥，绝对不能同时开启使用。**
+
+## 踩过的坑
+
+- **ASan 和 Valgrind 不能同时用**：一边 `-fsanitize=address` 编译一边 `valgrind ./a.out`，红区/影子内存会和 Valgrind 的插桩互相干扰，报错全是误报；二选一。
+- **ASan 必须重新编译且带 `-g`**：只在运行期挂 ASan 没用，编译命令要 `-fsanitize=address -g -fno-omit-frame-pointer`；漏了 `-g` 调用栈只有地址、漏了 `-fno-omit-frame-pointer` release 下栈会断。
+- **Valgrind 慢 10-50 倍只用来复现**：拿 Valgrind 跑压测/大回归用例基本跑不完，平时 CI 用 ASan，Valgrind 只在本地复现内存 bug 时跑最小用例。
+- **Valgrind 默认不输出完整泄漏**：必须加 `--leak-check=full --show-leak-kinds=all`，否则只报摘要；ASan 则默认开启 LeakSanitizer，程序退出自动报泄漏，不用额外参数。
+- **ASan 内存开销大**：红区和影子内存会让进程 RSS 涨 2-3 倍，嵌入式/大矩阵场景要确认机器内存够，别在资源受限设备上直接开 ASan 跑。

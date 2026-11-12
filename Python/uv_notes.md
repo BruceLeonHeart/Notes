@@ -174,6 +174,7 @@ print(requests.get("https://example.com").status_code)
 - run: uv run pytest
 ```
 
+注：action 版本会持续更新，以 astral-sh/setup-uv 的 GitHub 主页为准。
 `--frozen` 表示严格使用 lock 文件，不重新解析，保证可复现。
 
 ### 换源（国内镜像）
@@ -182,7 +183,7 @@ print(requests.get("https://example.com").status_code)
 # 单次命令
 uv pip install requests --index-url https://pypi.tuna.tsinghua.edu.cn/simple
 
-# 写入项目 uv.toml / pyproject.toml
+# 写入 pyproject.toml 的 [tool.uv] 段
 # [[tool.uv.index]]
 # url = "https://pypi.tuna.tsinghua.edu.cn/simple"
 # default = true

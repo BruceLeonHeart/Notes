@@ -9,10 +9,12 @@ Reducing repeated stuff and make life easier 😍
 ### AI / Agent / DL
 - `AI/agent_introduction.md` — Agent 智能体概念
 - `AI/ai_tools_and_models.md` — AI 工具与模型清单
-- `AI/china_ai_trends.md` — 国内 AI 走向
-- `AI/llm_in_software_development.md` — LLM 在软件开发中的应用
+- `AI/ai_trends.md` — 国内 AI 七条主线格局与 AI 辅助开发工作流
 - `AI/stable_diffusion.md` — Stable Diffusion 笔记
-- `AI/openclaw/` — OpenClaw 系列（运行机制、生态、部署、安全声明解读）
+- `AI/openclaw/deploy_openclaw_on_server.md` — OpenClaw 服务器部署
+- `AI/openclaw/openclaw_ecosystem_and_skills.md` — OpenClaw 生态与 Skills
+- `AI/openclaw/openclaw_how_it_works.md` — OpenClaw 运行机制（Gateway + channel）
+- `AI/openclaw/openclaw_security_statement_explained.md` — OpenClaw 安全声明解读
 - `Agent/Skills.md` — Agent Skills
 - `DL/nv12_image_processing.md` — NV12 格式输入图像处理
 - `Karpathy_LLM_WIKI.md` — Karpathy LLM 学习 Wiki
@@ -48,6 +50,8 @@ Reducing repeated stuff and make life easier 😍
 - `ROS/ros2_common_operations.md` — ROS2 常用操作
 - `Web/fullstack_introduction.md` — 全栈技术介绍
 - `Web/bff_backend_for_frontend.md` — BFF：多语言后端协同与通信规范
+- `Web/Django_intro.md` — Django 入门：ORM、Admin、Auth 三大内置特性
+- `Web/hybrid_desktop_app_frameworks_intro.md` — Tauri vs Electron 跨平台桌面框架对比
 
 ### Git / OS / SVN
 - `Git/git_common_operations.md` — Git 常见操作

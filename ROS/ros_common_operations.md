@@ -17,7 +17,9 @@
 - **工作空间（Workspace）**: 存放ROS包的目录结构
 
 ### ROS版本
-- **Noetic Ninjemys**: Ubuntu 20.04（ROS1 最后一个 LTS 版本，维护至 2025 年）
+> 完整的 Ubuntu ↔ ROS1/ROS2 发行版 ↔ 支持周期对照见 ROS/ros_distribution_compatibility.md
+
+- **Noetic Ninjemys**: Ubuntu 20.04（ROS1 最后一个 LTS 版本，已 EOL（2025年5月停止维护））
 - **Melodic Morenia**: Ubuntu 18.04（已停止维护）
 - **Kinetic Kame**: Ubuntu 16.04（已停止维护）
 
@@ -313,8 +315,11 @@ rosparam get /param_name
 # 查看某个命名空间下的所有参数
 rosparam get /namespace
 
-# 查看参数树
-rosparam dump -v
+# 查看全部参数（打印整个参数树）
+rosparam get /
+
+# 落盘参数到文件（配合 rosparam load 回灌）
+rosparam dump dump.yaml
 ```
 
 ### 设置参数

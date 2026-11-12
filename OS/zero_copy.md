@@ -124,3 +124,11 @@
 -   **RocketMQ**：同样在消息传递中使用了 `mmap` 技术来提高文件读写效率。
 -   **Netty**：Java 的高性能网络框架，也提供了对零拷贝的支持。
 
+## 坑
+
+- **零拷贝不是免费的**：它省的是 CPU 拷贝，但仍需 NIC 支持 scatter-gather DMA、内核版本够新、文件页在页缓存里；第一次冷读文件时 `sendfile` 走的还是 page cache miss，并不会比 read+write 快。
+- **`sendfile` 只能 fd→socket 或 fd→fd**：源必须是文件描述符（文件/pipe），不能直接把用户态 buffer（`malloc` 出来的数据）发出去；要发送应用层组装的数据还得先写临时文件或用 `splice` 绕。
+- **`mmap` 有页缓存抖动风险**：大文件 mmap 后随机访问会触发 page fault 和 page cache 回收，内存压力下反而比 read 慢；且 mmap 写入要等 msync 才落盘，崩溃会丢数据。
+- **DPDK/SRDMA 才是真正的"用户态零拷贝"**：Linux `sendfile`/`splice` 在内核态省了一次拷贝，但 buffer 仍在内核页缓存；要做到网卡和用户态 buffer 直接 DMA 直通，得用 DPDK、RDMA、io_uring + registered buffer。
+- **混淆"零拷贝"语义**：Netty/Java NIO 的零拷贝是用户态 buffer 合并、不是内核态的零拷贝；Kafka 的零拷贝指的是 `sendfile`，不是"完全没有数据移动"——DMA 拷贝和上下文切换依然存在。
+

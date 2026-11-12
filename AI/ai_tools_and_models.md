@@ -34,8 +34,8 @@
 
 ## 常见商用模型
 
-- 国外：Claude 系列、GPT 系列（具体版本号以官方最新发布为准，待核实）；
-- 国内：GLM、Kimi 2.5、MiniMax、Qwen3-Coder-Plus。
+- 国外：主流商业模型 Claude 5.x 系列、GPT-5.x 系列；
+- 国内：Qwen3 系列、Kimi 2.x、GLM-5、MiniMax。
 
 Coding Plan 套餐：GLM、KIMI、MiniMax。
 

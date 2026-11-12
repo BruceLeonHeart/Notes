@@ -19,11 +19,14 @@
 - **生命周期（Lifecycle）**: 节点的状态管理
 
 ### ROS2版本
-- **Foxy Fitzroy**: Ubuntu 20.04（LTS，已停止支持）
-- **Galactic Geochelone**: Ubuntu 20.04（已停止支持）
-- **Humble Hawksbill**: Ubuntu 22.04（LTS）
-- **Iron Irwini**: Ubuntu 22.04（非 LTS，已停止支持）
-- **Jazzy Jalisco**: Ubuntu 24.04（LTS，当前最新）
+> 完整的 Ubuntu ↔ ROS1/ROS2 发行版 ↔ 支持周期对照见 ROS/ros_distribution_compatibility.md
+
+- **Foxy Fitzroy**: Ubuntu 20.04（LTS，已 EOL）
+- **Galactic Geochelone**: Ubuntu 20.04（非 LTS，已 EOL）
+- **Humble Hawksbill**: Ubuntu 22.04（LTS，支持至 2027.5）
+- **Iron Irwini**: Ubuntu 22.04（非 LTS，已 EOL）
+- **Jazzy Jalisco**: Ubuntu 24.04（LTS，支持至 2029.5）
+- **Kilted Kaiju**: Ubuntu 24.04（非 LTS，最新）
 
 ---
 
@@ -280,7 +283,7 @@ colcon build
 ros2 msg list
 
 # 查看消息定义
-ros2 msg show std_msgs/msg/String
+ros2 interface show std_msgs/msg/String
 
 # 在接口列表中查找某消息类型
 ros2 interface list | grep geometry_msgs/msg/Twist
@@ -317,7 +320,7 @@ ros2 action type /action_name
 ros2 action info /action_name
 
 # 查看动作定义
-ros2 action show action_tutorials/action/Fibonacci
+ros2 interface show action_tutorials/action/Fibonacci
 ```
 
 ### 发送动作目标
@@ -557,10 +560,10 @@ export ROS_DOMAIN_ID=0
 ### 调试工具
 ```bash
 # 使用gdb调试C++节点
-ros2 run --prefix "gdb -ex run --args" package_name node_name
+ros2 run package_name node_name --prefix "gdb -ex run --args"
 
 # 使用valgrind检查内存
-ros2 run --prefix "valgrind" package_name node_name
+ros2 run package_name node_name --prefix "valgrind"
 
 # 查看节点的CPU和内存使用
 ros2 topic echo /diagnostics | grep -A 10 node_name
@@ -571,17 +574,17 @@ ros2 node info /node_name | grep -i time
 
 ### 开发工具
 ```bash
-# 代码自动生成
+# 查看消息/服务/动作定义（msg/srv/action show 旧动词已移除，统一用 interface show）
 ros2 interface show std_msgs/msg/String
 
-# 消息生成
-ros2 msg show package_name/msg/MessageType
+# 查看消息定义
+ros2 interface show package_name/msg/MessageType
 
-# 服务生成
-ros2 srv show package_name/srv/ServiceType
+# 查看服务定义
+ros2 interface show package_name/srv/ServiceType
 
-# 动作生成
-ros2 action show package_name/action/ActionType
+# 查看动作定义
+ros2 interface show package_name/action/ActionType
 ```
 
 ---
@@ -628,9 +631,6 @@ colcon build --packages-select <pkg> # 编译特定包
 
 ### 实用命令
 ```bash
-# 查看ROS2版本
-ros2 --version
-
 # 查看ROS2环境
 printenv | grep ROS
 printenv | grep AMENT
@@ -639,13 +639,13 @@ printenv | grep AMENT
 ros2 pkg prefix <pkg> && ls -la $(ros2 pkg prefix <pkg>)/lib/<pkg>
 
 # 查看消息定义
-ros2 msg show <msg>
+ros2 interface show <msg>
 
 # 查看服务定义
-ros2 srv show <srv>
+ros2 interface show <srv>
 
 # 查看动作定义
-ros2 action show <action>
+ros2 interface show <action>
 
 # 查看TF变换
 ros2 run tf2_ros tf2_echo <frame1> <frame2>

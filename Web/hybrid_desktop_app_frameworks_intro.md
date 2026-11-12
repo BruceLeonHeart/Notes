@@ -1,3 +1,8 @@
+# Tauri vs Electron：跨平台桌面框架对比
+
+> 类型：concept
+> 一句话：Tauri 与 Electron 的架构与选型
+
 Tauri 和 Electron 都属于**跨平台桌面应用开发框架**（Hybrid Desktop App Frameworks）。
 
 它们的出现打破了传统客户端必须使用 C++、C# 或 Swift 等原生语言编写 UI 的壁垒，允许开发者**使用现代 Web 前端技术（HTML、CSS、JavaScript / TypeScript、React、Vue 等）来构建桌面客户端的用户界面**。

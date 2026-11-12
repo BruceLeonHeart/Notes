@@ -1,4 +1,57 @@
-这三个特性是 Django 被称为“自带电池（Batteries-Included）重型框架”的核心原因。它们将开发 Web 服务中最繁琐、重复且容易出安全漏洞的基础设施全部内置做好了：
+# Django 入门：ORM、Admin、Auth 三大内置特性
+
+> 类型：concept
+> 一句话：Django 内置电池的核心机制
+
+Django 被称为自带电池的重型框架，核心在于它把 Web 开发最繁琐的三件事内置做好了：ORM、Admin 后台、Auth 认证。它们将开发 Web 服务中最重复、最容易出安全漏洞的基础设施全部打包：
+
+---
+
+## 最小入门
+
+安装并跑起第一个页面：
+
+```bash
+pip install django
+django-admin startproject mysite
+cd mysite
+python manage.py runserver
+```
+
+`startproject` 生成的目录结构：
+
+```
+mysite/
+├── manage.py        # Django 命令行入口（migrate、runserver、createsuperuser 等）
+└── mysite/
+    ├── settings.py  # 项目配置：INSTALLED_APPS、数据库、中间件
+    ├── urls.py      # 路由表：URL 路径 → 视图函数
+    └── wsgi.py / asgi.py
+```
+
+第一个视图（在 `mysite/views.py` 里新建）：
+
+```python
+from django.http import HttpResponse
+
+def index(request):
+    return HttpResponse("Hello")
+```
+
+在 `mysite/urls.py` 里把路由绑上去：
+
+```python
+from django.contrib import admin
+from django.urls import path
+from .views import index
+
+urlpatterns = [
+    path("admin/", admin.site.urls),
+    path("", index),
+]
+```
+
+浏览器访问 `http://127.0.0.1:8000/` 即可看到 Hello。下面三节讲 Django 真正的杀手锏。
 
 ---
 

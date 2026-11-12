@@ -310,3 +310,11 @@ int main() {
 | `static` | 控制变量的存储周期和链接性；创建类级别的共享成员。 | **生命周期** 和 **作用域/可见性** |
 | `const` | 保证变量或对象在初始化后不可修改；约束函数行为。 | **不变性** 和 **只读** |
 | `constexpr` | 声明表达式为编译时常量，用于编译期计算。 | **编译时确定性** |
+
+## 坑
+
+- **类 static 成员必须类外定义**：只在类内声明 `static int count;` 不写 `int MyClass::count;` 会链接报错（undefined reference），只有 `static constexpr` 整型或 C++17 的 `inline static` 才能类内直接初始化。
+- **static 局部变量的初始化是线程安全但有锁**：C++11 起 magic static 保证首次初始化线程安全，但首次进入会有一次性开销，且初始化期间其他线程阻塞，热路径里别放大对象构造。
+- **`const int*` 和 `int* const` 看 const 在 `*` 哪一侧**：`const int* p` 指向的值不可改、指针可换；`int* const p` 指针不可换、值可改——读声明从右往左读，搞反就会写出编译不过的代码。
+- **const 成员函数不是"承诺不修改对象"那么简单**：它内部 `this` 是 `const T*`，不能改普通成员，但可改 `mutable` 成员、可调非 const 的全局对象；把锁/计数器标 `mutable` 是惯例。
+- **const 对象调非 const 函数直接编译错**：`const Point p; p.move();` 报错，反过来非常量对象优先调非 const 重载——重载决议时 const 是签名的一部分，写 API 时两个版本都要提供。

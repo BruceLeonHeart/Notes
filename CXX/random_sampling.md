@@ -193,3 +193,11 @@ void reservoir_sampling(const std::vector<int>& data, int k) {
     std::cout << std::endl;
 }
 ```
+
+## 坑
+
+- **`rand()` 是全局状态**：多线程下并发调用会数据竞争，且 `srand(time(nullptr))` 一秒内重复播种会得到相同序列；多线程/复现场景必须用 `<random>` 的局部引擎。
+- **分布对象要复用不要每次构造**：`std::uniform_int_distribution` 每次调用都重新取随机数，但构造本身也有开销，更重要的是引擎对象必须复用——每次 `mt19937 gen(rd())` 都会重置状态，洗牌/采样结果不可复现。
+- **洗牌用 `std::shuffle` 不要用 `std::random_shuffle`**：后者已在 C++14 弃用、C++17 移除，且默认用 `rand()` 导致质量差和不可复现，RANSAC 等算法里必须传 mt19937 给 `std::shuffle`。
+- **真随机数用 `std::random_device` 但别指望它永远快/真**：部分平台（WSL、某些虚拟机）`random_device` 是确定性的伪实现，只适合播种，不适合直接取数；加密场景要确认后端。
+- **取模 `rand() % N` 分布有偏**：`RAND_MAX` 不是 N 的整数倍时小余数概率偏高，正确做法是 `uniform_int_distribution`，不要手写取模。
