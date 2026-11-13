@@ -48,6 +48,7 @@ Reducing repeated stuff and make life easier 😍
 - `Docker/access_remote_docker_with_vscode.md` — VSCode 远程连 Docker
 - `ROS/ros_common_operations.md` — ROS 常用操作
 - `ROS/ros2_common_operations.md` — ROS2 常用操作
+- `Calibration/extrinsic_zero_reference.md` — 相机外参标定零位参考（OpenCV ↔ ISO 8855）
 - `Web/fullstack_introduction.md` — 全栈技术介绍
 - `Web/bff_backend_for_frontend.md` — BFF：多语言后端协同与通信规范
 - `Web/Django_intro.md` — Django 入门：ORM、Admin、Auth 三大内置特性
@@ -96,3 +97,4 @@ Reducing repeated stuff and make life easier 😍
 - 服务器上部署 OpenClaw → `AI/openclaw/deploy_openclaw_on_server.md`
 - 服务器无浏览器免密推 GitHub → `Git/github_cli_and_token_autosave.md`
 - gRPC vs REST 怎么选、HTTP/3 为什么用 UDP → `Web/RPC_intro.md`
+- 相机外参标定输出的欧拉角为什么不是 0 而是 ±90° → `Calibration/extrinsic_zero_reference.md`
