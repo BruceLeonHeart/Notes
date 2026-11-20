@@ -323,6 +323,21 @@ git config core.fileMode false
 git revert <commit-hash>
 git push
 ```
+### 超时时间查看和设置
+```bash
+# 如果通过http和https
+git config --global --get http.timeout #(如果终端没有任何输出，说明你没有手动配置过，Git 正在使用底层 curl 工具的默认网络超时策略。)
+
+git config --global http.timeout 60 # unit:sec
+
+# 当传输速度低于 1000 字节/秒，并且持续超过 120 秒时，才判定为超时断开
+git config --global http.lowSpeedLimit 1000
+git config --global http.lowSpeedTime 120
+
+# 如果你使用的是 SSH 协议，Git 本身不管理超时，超时是由操作系统的 SSH 客户端控制的。
+```
+
+
 
 ### 修改提交历史（谨慎使用）
 ```bash
@@ -367,4 +382,46 @@ git config --list --show-origin
 | `gd` | `git diff` | 查看工作区改动 |
 | `gds` | `git diff --staged` | 比较暂存区改动 |
 
-完整清单见同目录 `.bashrc`，可复制到 `~/.bashrc` 使用。
+完整清单如下，可复制到 `~/.bashrc` 使用。
+
+```bash
+# ===== Git 快捷命令 =====
+alias g='git'
+
+# 状态 & 日志
+alias gs='git status'
+alias gss='git status -s'  # 简短状态
+alias gl='git log --oneline --graph --decorate'
+alias gla='git log --oneline --graph --decorate --all'
+
+# 分支操作
+alias sub='git submodule'
+alias br='git branch'
+alias gba='git branch -a'  # 显示所有分支（包括远程）
+alias gbd='git branch -d'  # 删除分支
+alias co='git checkout'
+alias gcob='git checkout -b'  # 创建并切换分支
+
+# 提交相关
+alias ga='git add'
+alias gaa='git add --all'  # 添加所有文件
+alias gc='git commit -m'
+alias gca='git commit --amend'  # 修改最后一次提交
+alias gcan='git commit --amend --no-edit'  # 修改提交但不改消息
+
+# 远程 & 推送/拉取
+alias gf='git fetch'
+alias gpl='git pull'
+alias gps='git push'
+alias gpsu='git push -u origin HEAD'  # 推送并设置上游分支
+
+# 暂存 & 恢复
+alias gst='git stash'
+alias gstp='git stash pop'
+alias gr='git restore'
+alias grs='git restore --staged'  # 取消暂存
+
+# 差异比较
+alias gd='git diff'
+alias gds='git diff --staged'  # 比较暂存区改动
+```
